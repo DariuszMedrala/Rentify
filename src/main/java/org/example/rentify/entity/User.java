@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -46,6 +47,9 @@ public class User {
 
     @Column(name = "registration_date")
     private LocalDate registrationDate;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Property> properties;
 
     public enum Role {
         USER,
