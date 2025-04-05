@@ -51,6 +51,9 @@ public class Booking {
     @Column(name = "booking_status", nullable = false)
     private BookingStatus bookingStatus;
 
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Payment payment;
+
     public enum BookingStatus {
         PENDING,
         CONFIRMED,
