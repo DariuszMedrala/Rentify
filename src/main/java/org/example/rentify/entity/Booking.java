@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -53,6 +54,9 @@ public class Booking {
 
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
 
     public enum BookingStatus {
         PENDING,
