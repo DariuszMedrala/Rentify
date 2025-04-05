@@ -50,6 +50,7 @@ public class Property {
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
 
+    @Column(name = "area", nullable = false)
     private Double area;
 
     @Column(name = "number_of_rooms")
@@ -63,8 +64,8 @@ public class Property {
     @Column(name = "creation_date", nullable = false, updatable = false)
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings;

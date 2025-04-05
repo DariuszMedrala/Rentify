@@ -14,6 +14,5 @@ CREATE TABLE properties (
     price_per_day DECIMAL(10, 2) NOT NULL,
     availability BOOLEAN DEFAULT TRUE,
     creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    image_url VARCHAR(255),
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
