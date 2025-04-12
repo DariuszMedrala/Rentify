@@ -5,11 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -22,7 +27,7 @@ import java.util.Set;
  * User entity representing a user in the system.
  * This class is mapped to the "users" table in the database.
  */
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,18 +42,33 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 20)
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @Column(name = "first_name", length = 50)
     private String firstName;
 
     @Column(name = "last_name", length = 50)
     private String lastName;
 
+    @Column(name = "phone_number", length = 15)
+    private String phoneNumber;
+
     @Column(name = "registration_date")
     private LocalDate registrationDate;
+
+    @Column(name = "account_non_expired", nullable = false)
+    @Builder.Default
+    private boolean accountNonExpired = true;
+
+    @Column(name = "account_non_locked", nullable = false)
+    @Builder.Default
+    private boolean accountNonLocked = true;
+
+    @Column(name = "credentials_non_expired", nullable = false)
+    @Builder.Default
+    private boolean credentialsNonExpired = true;
+
+    @Column(name = "enabled", nullable = false)
+    @Builder.Default
+    private boolean enabled = true;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
@@ -69,6 +89,36 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
-    @Builder.Default 
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.roles == null) {
+            return Set.of();
+        }
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
+    }
 }

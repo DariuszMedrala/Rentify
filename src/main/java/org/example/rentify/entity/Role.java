@@ -16,6 +16,11 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = "users")
+
+/*
+ * Role entity representing a role in the system.
+ * This class is mapped to the "roles" table in the database.
+ */
 public class Role {
 
     @Id
