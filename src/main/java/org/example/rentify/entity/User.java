@@ -48,6 +48,10 @@ public class User {
     @Column(name = "registration_date")
     private LocalDate registrationDate;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
+    private Address address;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Property> properties;
 
