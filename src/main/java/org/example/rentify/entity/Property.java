@@ -37,15 +37,6 @@ public class Property {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String address;
-
-    @Column(nullable = false)
-    private String city;
-
-    @Column(name = "postal_code", nullable = false)
-    private String postalCode;
-
     @Column(name = "property_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;

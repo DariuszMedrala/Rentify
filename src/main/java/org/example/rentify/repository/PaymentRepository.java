@@ -33,7 +33,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * @param paymentStatus the payment status of the payment
      * @return the payment with the specified payment status, or null if not found
      */
-    List<Payment> findByPaymentStatus(Payment.PaymentStatus paymentStatus);
+    List<Payment> findByPaymentStatus(String paymentStatus);
 
     /**
      * Finds a payment by its payment method.
@@ -41,5 +41,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * @param paymentMethod the payment method of the payment
      * @return the payment with the specified payment method, or null if not found
      */
-    List<Payment> findByPaymentMethod(Payment.PaymentMethod paymentMethod);
+    List<Payment> findByPaymentMethod(String paymentMethod);
 }

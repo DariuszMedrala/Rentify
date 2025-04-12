@@ -32,5 +32,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      * @param bookingStatus the status of the booking
      * @return a list of bookings with the specified status
      */
-    List<Booking> findByBookingStatus(Booking.BookingStatus bookingStatus);
+    List<Booking> findByBookingStatus(String bookingStatus);
 }
