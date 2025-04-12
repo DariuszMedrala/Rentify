@@ -44,18 +44,4 @@ public class Payment {
 
     @Column(name = "transaction_id")
     private String transactionId;
-
-    public enum PaymentMethod {
-        CREDIT_CARD,
-        PAYPAL,
-        BANK_TRANSFER,
-        CASH
-    }
-
-    public enum PaymentStatus {
-        PENDING,
-        COMPLETED,
-        FAILED,
-        REFUNDED
-    }
 }

@@ -73,13 +73,4 @@ public class Property {
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
-
-    public enum PropertyType {
-        APARTMENT,
-        HOUSE,
-        STUDIO,
-        VILLA,
-        LOFT,
-        PENTHOUSE,
-    }
 }
