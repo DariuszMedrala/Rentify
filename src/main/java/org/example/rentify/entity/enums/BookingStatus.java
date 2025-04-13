@@ -1,4 +1,4 @@
-package org.example.rentify.entity;
+package org.example.rentify.entity.enums;
 
 public enum BookingStatus {
     PENDING,
