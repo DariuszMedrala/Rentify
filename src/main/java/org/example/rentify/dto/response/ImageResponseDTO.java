@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class ImageResponseDTO {
 
     private Long id;
-    private Long propertyId;
+    private PropertyResponseDTO property;
     private String imageUrl;
     private String description;
     private LocalDateTime uploadDate;
