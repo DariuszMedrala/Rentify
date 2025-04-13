@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  * the client and server.
  */
 public class AddressResponseDTO {
-
+    private Long id;
     private String streetAddress;
     private String city;
     private String stateOrProvince;
