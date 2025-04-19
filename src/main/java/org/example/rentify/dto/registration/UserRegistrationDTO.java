@@ -1,6 +1,7 @@
 // UserRegistrationDTO.java
 package org.example.rentify.dto.registration;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Data Transfer Object for user registration")
 /*
  * UserRegistrationDTO is a Data Transfer Object (DTO) that represents the request
  * for user registration in the Rentify application. It is used to transfer data between

@@ -1,5 +1,6 @@
 package org.example.rentify.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
+@Schema(description = "Data Transfer Object for address creation")
 /*
  * AddressRequestDTO is a Data Transfer Object (DTO) that represents the request
  * for an address in the Rentify application. It is used to transfer data between
