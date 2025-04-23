@@ -1,4 +1,3 @@
-// UserRegistrationDTO.java
 package org.example.rentify.dto.registration;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,8 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.example.rentify.dto.request.AddressRequestDTO;
-
-import java.util.Set;
 
 @Data
 @NoArgsConstructor

@@ -1,7 +1,5 @@
 package org.example.rentify.config;
 
-
-import org.example.rentify.security.UserDetailsServiceImpl;
 import org.example.rentify.security.jwt.JwtAuthenticationEntryPoint;
 import org.example.rentify.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -31,19 +29,17 @@ public class SecurityConfig {
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserDetailsServiceImpl userDetailsService;
 
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-                            JwtAuthenticationFilter jwtAuthenticationFilter,
-                            UserDetailsServiceImpl userDetailsService) {
+                            JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.userDetailsService = userDetailsService;
     }
 
-    /*
-     * This method configures the authentication manager.
-     * It uses the provided AuthenticationConfiguration to create an AuthenticationManager instance.
+    /**
+     * This method configures the password encoder to be used in the application.
+     * It uses BCryptPasswordEncoder for hashing passwords.
+     * @return the PasswordEncoder instance
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -51,9 +47,11 @@ public class SecurityConfig {
     }
 
     /**
-     * This method configures the authentication manager.
-     * @param authenticationConfiguration
+     * This method configures the authentication manager for the application.
+     * It uses the provided AuthenticationConfiguration to create the manager.
+     * @param authenticationConfiguration the AuthenticationConfiguration to use
      * @return the AuthenticationManager instance
+     * @throws Exception if an error occurs during configuration
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -63,9 +61,8 @@ public class SecurityConfig {
     /**
      * This method configures the security filter chain for the application.
      * It sets up CSRF protection, authorization rules, and exception handling.
-     * The JWT authentication filter is added to the filter chain.
      * @param http the HttpSecurity object to configure
-     * @return the configured SecurityFilterChain
+     * @return the SecurityFilterChain instance
      * @throws Exception if an error occurs during configuration
      */
     @Bean

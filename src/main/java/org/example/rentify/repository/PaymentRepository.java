@@ -1,6 +1,8 @@
 package org.example.rentify.repository;
 
 import org.example.rentify.entity.Payment;
+import org.example.rentify.entity.enums.PaymentMethod;
+import org.example.rentify.entity.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -28,18 +30,18 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Payment findByBookingId(Long bookingId);
 
     /**
-     * Finds a payment by its payment status.
+     * Finds all payments with the specified payment status.
      *
-     * @param paymentStatus the payment status of the payment
-     * @return the payment with the specified payment status, or null if not found
+     * @param paymentStatus the payment status of the payments
+     * @return a list of payments with the specified payment status
      */
-    List<Payment> findByPaymentStatus(String paymentStatus);
+    List<Payment> findByPaymentStatus(PaymentStatus paymentStatus);
 
     /**
-     * Finds a payment by its payment method.
+     * Finds all payments with the specified payment method.
      *
-     * @param paymentMethod the payment method of the payment
-     * @return the payment with the specified payment method, or null if not found
+     * @param paymentMethod the payment method of the payments
+     * @return a list of payments with the specified payment method
      */
-    List<Payment> findByPaymentMethod(String paymentMethod);
+    List<Payment> findByPaymentMethod(PaymentMethod paymentMethod);
 }

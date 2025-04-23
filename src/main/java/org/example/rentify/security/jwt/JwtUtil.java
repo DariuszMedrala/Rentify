@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Component
 /*
  * Utility class for generating and validating JWT tokens.
- * It uses the io.jsonwebtoken library to create and parse JWT tokens.
+ * This class uses the io.jsonwebtoken library to handle JWT operations.
  */
 public class JwtUtil {
 

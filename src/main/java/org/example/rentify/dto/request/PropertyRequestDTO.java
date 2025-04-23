@@ -11,7 +11,7 @@ import org.example.rentify.entity.enums.PropertyType;
 @NoArgsConstructor
 @AllArgsConstructor
 /*
- * RoleRequestDTO is a Data Transfer Object (DTO) that represents the request
+ * PropertyRequest DTO is a Data Transfer Object (DTO) that represents the request
  * for a role in the Rentify application. It is used to transfer data between
  * the client and server.
  */
@@ -41,7 +41,7 @@ public class PropertyRequestDTO {
     private boolean availability = true;
 
     @NotNull(message = "Address cannot be null")
-    @Valid // Ensure nested AddressRequestDTO is also validated
+    @Valid
     private AddressRequestDTO address;
 
     @NotNull(message = "Owner ID cannot be null")

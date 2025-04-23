@@ -1,11 +1,12 @@
 package org.example.rentify.repository;
 
 import org.example.rentify.entity.Property;
+import org.example.rentify.entity.enums.PropertyType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-/**
+/*
  * PropertyRepository interface for managing Property entities.
  * It extends JpaRepository to provide CRUD operations and custom query methods.
  */
@@ -27,12 +28,12 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      */
     List<Property> findByOwnerUsername(String username);
 
-    /**
-     * Finds properties by their property type and availability status.
+   /**
+     * Finds properties by their type and availability status.
      *
      * @param propertyType the type of the properties
      * @param availability the availability status of the properties
-     * @return a list of properties with the specified property type and availability status
+     * @return a list of properties with the specified type and availability status
      */
-    List<Property> findByPropertyTypeAndAvailability(String propertyType, Boolean availability);
+    List<Property> findByPropertyTypeAndAvailability(PropertyType propertyType, Boolean availability);
 }

@@ -16,9 +16,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * UserService is a service class that handles user-related operations.
- * It provides methods for user registration, checking if a username or email exists,
- * and managing user roles.
+ * UserService class for managing users in the system.
+ * This class provides methods to interact with the UserRepository.
  */
 @Service
 public class UserService {

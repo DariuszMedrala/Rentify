@@ -37,8 +37,7 @@ public class DataInitializer implements CommandLineRunner {
 
     /**
      * This method is called when the application starts.
-     * It initializes the database with default roles and an admin user.
-     *
+     * It initializes the database with default roles and an admin user if they do not exist.
      * @param args command line arguments
      * @throws Exception if an error occurs during initialization
      */

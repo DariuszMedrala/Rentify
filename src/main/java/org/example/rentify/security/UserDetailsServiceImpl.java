@@ -9,16 +9,19 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 /*
  * UserDetailsServiceImpl class implements the UserDetailsService interface.
  * It is responsible for loading user-specific data during authentication.
- * This class is annotated with @Service to indicate that it is a service component.
  */
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     UserRepository userRepository;
+
+    User user;
 
     /**
      * This method loads user details by username.
@@ -29,9 +32,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * @throws UsernameNotFoundException if the user is not found
      */
     @Override
-    @Transactional // Important for lazy loading of roles if not EAGER fetched
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
         return user;

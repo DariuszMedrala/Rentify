@@ -2,8 +2,8 @@ package org.example.rentify.security.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,9 +25,9 @@ import java.io.IOException;
 
 @Component
 /*
- * This class is a filter that checks for the presence of a JWT token in the request headers.
- * If a valid token is found, it sets the authentication in the security context.
- * It extends OncePerRequestFilter to ensure that it is executed once per request.
+ * JwtAuthenticationFilter is a filter that checks for the presence of a JWT token
+ * in the request headers and validates it. If the token is valid, it sets the
+ * authentication in the security context.
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -95,10 +95,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Parses the JWT from the Authorization header.
+     * This method parses the JWT token from the request headers.
      *
      * @param request The HTTP request.
-     * @return The JWT string or null if not found or not correctly formatted.
+     * @return The JWT token if present, otherwise null.
      */
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader(HEADER_AUTHORIZATION);

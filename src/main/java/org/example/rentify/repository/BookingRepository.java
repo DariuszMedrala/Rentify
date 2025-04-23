@@ -1,6 +1,7 @@
 package org.example.rentify.repository;
 
 import org.example.rentify.entity.Booking;
+import org.example.rentify.entity.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -29,8 +30,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     /**
      * Finds bookings by the booking status.
+     *
      * @param bookingStatus the status of the booking
      * @return a list of bookings with the specified status
      */
-    List<Booking> findByBookingStatus(String bookingStatus);
+    List<Booking> findByBookingStatus(BookingStatus bookingStatus);
 }

@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Service class for managing roles.
+ * RoleService class for managing roles in the system.
+ * This class provides methods to interact with the RoleRepository.
  */
 @Service
 public class RoleService {

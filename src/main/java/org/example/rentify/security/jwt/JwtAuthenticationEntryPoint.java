@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class handles unauthorized access attempts to the application.
- * It implements the AuthenticationEntryPoint interface from Spring Security.
- * When an unauthorized request is made, it sends a JSON response with the error details.
+ * JwtAuthenticationEntryPoint is a custom implementation of the AuthenticationEntryPoint interface.
+ * It handles unauthorized access attempts by sending a JSON response with error details.
+ * This class is used in the Spring Security configuration to handle authentication errors.
  */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -26,12 +26,14 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationEntryPoint.class);
 
     /**
-     * This method is called when an unauthorized request is made.
+     * This method is called when an authentication error occurs.
      * It sends a JSON response with the error details.
      *
      * @param request the HttpServletRequest object
      * @param response the HttpServletResponse object
      * @param authException the AuthenticationException that occurred
+     * @throws IOException if an input or output exception occurs
+     * @throws ServletException if a servlet exception occurs
      */
     @Override
     public void commence(HttpServletRequest request,
