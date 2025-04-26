@@ -3,37 +3,16 @@ package org.example.rentify.mapper;
 import org.example.rentify.dto.request.ImageRequestDTO;
 import org.example.rentify.dto.response.ImageResponseDTO;
 import org.example.rentify.entity.Image;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
-import java.util.List;
-
-/*
-* ImageMapper interface for converting between Image entities and DTOs.
-* This interface uses MapStruct to generate the implementation code.
+/**
+ * ImageMapper interface for mapping between Image entity and DTOs.
+ * Uses MapStruct for automatic implementation generation.
  */
-@Mapper(componentModel = "spring",
-        uses = {PropertyMapper.class},
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        uses = {PropertyMapper.class}
+)
 public interface ImageMapper {
-
-    /**
-     * Converts an Image entity to an ImageResponseDTO.
-     *
-     * @param image the Image entity to convert
-     * @return the converted ImageResponseDTO
-     */
-    @Mapping(target = "property", source = "property")
-    ImageResponseDTO toDto(Image image);
-
-    /**
-     * Converts a list of Image entities to a list of ImageResponseDTOs.
-     *
-     * @param images the list of Image entities to convert
-     * @return the list of converted ImageResponseDTOs
-     */
-    List<ImageResponseDTO> toDtoList(List<Image> images);
 
     /**
      * Converts an ImageRequestDTO to an Image entity.
@@ -44,5 +23,24 @@ public interface ImageMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "property", ignore = true)
     @Mapping(target = "uploadDate", expression = "java(java.time.LocalDateTime.now())")
-    Image toEntity(ImageRequestDTO imageRequestDTO);
+    Image imageRequestDtoToImage(ImageRequestDTO imageRequestDTO);
+
+    /**
+     * Converts an Image entity to an ImageResponseDTO.
+     *
+     * @param image the Image entity to convert
+     * @return the converted ImageResponseDTO
+     */
+    ImageResponseDTO imageToImageResponseDto(Image image);
+
+    /**
+     * Updates an existing Image entity with data from an ImageRequestDTO.
+     *
+     * @param imageRequestDTO the DTO containing update data
+     * @param image the Image entity to update
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "property", ignore = true)
+    @Mapping(target = "uploadDate", ignore = true)
+    void updateImageFromDto(ImageRequestDTO imageRequestDTO, @MappingTarget Image image);
 }

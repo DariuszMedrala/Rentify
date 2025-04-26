@@ -3,66 +3,62 @@ package org.example.rentify.mapper;
 import org.example.rentify.dto.request.PropertyRequestDTO;
 import org.example.rentify.dto.response.PropertyResponseDTO;
 import org.example.rentify.entity.Property;
+import org.example.rentify.entity.User;
 import org.mapstruct.*;
 
-import java.util.List;
-
-/*
-* PropertyMapper interface for mapping between a Property entity and PropertyRequestDTO/PropertyResponseDTO.
-* This interface uses MapStruct to generate the implementation at compile time.
+/**
+ * PropertyMapper interface for mapping between Property entity and DTOs.
+ * Uses MapStruct for automatic implementation generation.
  */
-@Mapper(componentModel = "spring",
-        uses = {UserMapper.class, AddressMapper.class, ImageMapper.class, ReviewMapper.class},
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        uses = {AddressMapper.class, UserMapper.class, ReviewMapper.class, ImageMapper.class, BookingMapper.class})
 public interface PropertyMapper {
 
     /**
-     * Maps a Property entity to a PropertyResponseDTO.
+     * Converts a PropertyRequestDTO to a Property entity.
      *
-     * @param property the Property entity to map
-     * @return the mapped PropertyResponseDTO
-     */
-    @Mapping(target = "owner", source = "owner")
-    @Mapping(target = "address", source = "address")
-    @Mapping(target = "images", source = "images")
-    @Mapping(target = "reviews", source = "reviews")
-    PropertyResponseDTO toDto(Property property);
-
-    /**
-     * Maps a list of Property entities to a list of PropertyResponseDTOs.
-     *
-     * @param properties the list of Property entities to map
-     * @return the list of mapped PropertyResponseDTOs
-     */
-    List<PropertyResponseDTO> toDtoList(List<Property> properties);
-
-    /**
-     * Maps a PropertyRequestDTO to a Property entity.
-     *
-     * @param propertyRequestDTO the PropertyRequestDTO to map
-     * @return the mapped Property entity
+     * @param propertyRequestDTO the PropertyRequestDTO to convert
+     * @return the converted Property entity
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "creationDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "owner", ignore = true)
-    @Mapping(target = "address", source = "address")
-    @Mapping(target = "images", ignore = true)
-    @Mapping(target = "bookings", ignore = true)
+    @Mapping(target = "creationDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "reviews", ignore = true)
-    Property toEntity(PropertyRequestDTO propertyRequestDTO);
+    @Mapping(target = "images", ignore = true)
+    @Mapping(target = "availability", source = "availability")
+    @Mapping(target = "bookings", ignore = true)
+    Property propertyRequestDtoToProperty(PropertyRequestDTO propertyRequestDTO);
 
     /**
-     *  Updates an existing Property entity with values from a PropertyRequestDTO.
+     * Converts a Property entity to a PropertyResponseDTO.
      *
-     * @param dto  the PropertyRequestDTO containing the new values
-     * @param entity the existing Property entity to update
+     * @param property the Property entity to convert
+     * @return the converted PropertyResponseDTO
+     */
+    PropertyResponseDTO propertyToPropertyResponseDto(Property property);
+
+    /**
+     * Updates an existing Property entity with data from a PropertyRequestDTO.
+     *
+     * @param propertyRequestDTO the DTO containing update data
+     * @param property the Property entity to update
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "creationDate", ignore = true)
+    @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "bookings", ignore = true)
-    @Mapping(target = "reviews", ignore = true)
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(PropertyRequestDTO dto, @MappingTarget Property entity);
+    void updatePropertyFromDto(PropertyRequestDTO propertyRequestDTO, @MappingTarget Property property);
+
+    /**
+     * Sets the owner of a property.
+     *
+     * @param property The property to update
+     * @param owner The user who owns the property
+     */
+    @AfterMapping
+    default void setOwner(@MappingTarget Property property, User owner) {
+        property.setOwner(owner);
+    }
 }

@@ -1,38 +1,46 @@
 package org.example.rentify.mapper;
 
+import org.example.rentify.dto.request.RoleRequestDTO;
 import org.example.rentify.dto.response.RoleResponseDTO;
 import org.example.rentify.entity.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import java.util.Set;
-
-/*
- * RoleMapper interface for mapping Role entities to RoleResponseDTOs.
- * This interface uses MapStruct to generate the implementation at compile time.
+/**
+ * RoleMapper interface for mapping between Role entity and DTOs.
+ * Uses MapStruct for automatic implementation generation.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface RoleMapper {
 
-    RoleMapper INSTANCE = Mappers.getMapper(RoleMapper.class);
+    /**
+     * Converts a RoleRequestDTO to a Role entity.
+     *
+     * @param roleRequestDTO the RoleRequestDTO to convert
+     * @return the converted Role entity
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "users", ignore = true)
+    Role roleRequestDtoToRole(RoleRequestDTO roleRequestDTO);
 
     /**
-     * Maps a Role entity to a RoleResponseDTO.
+     * Converts a Role entity to a RoleResponseDTO.
      *
-     * @param role the Role entity to map
-     * @return the mapped RoleResponseDTO
+     * @param role the Role entity to convert
+     * @return the converted RoleResponseDTO
      */
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "description", source = "description")
-    RoleResponseDTO toDto(Role role);
+    RoleResponseDTO roleToRoleResponseDto(Role role);
 
     /**
-     * Maps a set of Role entities to a set of RoleResponseDTOs.
+     * Updates an existing Role entity with data from a RoleRequestDTO.
      *
-     * @param roles the set of Role entities to map
-     * @return the mapped set of RoleResponseDTOs
+     * @param roleRequestDTO the DTO containing update data
+     * @param role the Role entity to update
      */
-    Set<RoleResponseDTO> toDtoSet(Set<Role> roles);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "users", ignore = true)
+    void updateRoleFromDto(RoleRequestDTO roleRequestDTO, @MappingTarget Role role);
 }
