@@ -47,7 +47,7 @@ public class UserRegistrationDTO {
     private String lastName;
 
     @Size(max = 15, message = "Phone number must be less than 15 characters")
-    @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\d{10}$", message = "Invalid phone number format") // Adjust regex as needed
+    @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\d{10}$", message = "Invalid phone number format")
     private String phoneNumber;
 
     @Valid
