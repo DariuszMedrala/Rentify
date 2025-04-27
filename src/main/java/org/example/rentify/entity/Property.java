@@ -51,9 +51,12 @@ public class Property {
     @Column(name = "price_per_day", nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerDay;
 
+    @Column(name = "availability", nullable = false)
+    @Builder.Default
     private Boolean availability = true;
 
     @Column(name = "creation_date", nullable = false, updatable = false)
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
