@@ -39,12 +39,11 @@ public class DataInitializer implements CommandLineRunner {
      * This method is called when the application starts.
      * It initializes the database with default roles and an admin user if they do not exist.
      * @param args command line arguments
-     * @throws Exception if an error occurs during initialization
      */
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
-        Role adminRole = roleRepository.findByName("ADMIN")
+    public void run(String... args){
+        Role adminRole = roleRepository.findRoleByName("ADMIN")
                 .orElseGet(() -> {
                     Role newRole = new Role();
                     newRole.setName("ADMIN");
@@ -52,7 +51,7 @@ public class DataInitializer implements CommandLineRunner {
                     return roleRepository.save(newRole);
                 });
 
-        Role userRole = roleRepository.findByName("USER")
+        Role userRole = roleRepository.findRoleByName("USER")
                 .orElseGet(() -> {
                     Role newRole = new Role();
                     newRole.setName("USER");

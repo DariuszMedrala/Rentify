@@ -78,7 +78,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/public/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/me").hasAnyRole("USER", "ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
@@ -88,5 +87,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }
