@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 /*
  * RoleRequestDTO is a Data Transfer Object (DTO) that represents the request
  * for a role in the Rentify application. It is used to transfer data between

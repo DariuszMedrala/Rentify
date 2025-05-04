@@ -5,16 +5,17 @@ import org.example.rentify.dto.request.UserRequestDTO;
 import org.example.rentify.dto.response.UserResponseDTO;
 import org.example.rentify.entity.Role;
 import org.example.rentify.entity.User;
-import org.example.rentify.exception.ResourceNotFoundException;
 import org.example.rentify.mapper.UserMapper;
 import org.example.rentify.repository.RoleRepository;
 import org.example.rentify.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,13 +30,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper; // UserMapper is still needed here
+    private final UserMapper userMapper;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
-                       UserMapper userMapper) { // Inject UserMapper
+                       UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -82,7 +83,7 @@ public class UserService {
         User newUser = userMapper.userRegistrationDtoToUser(registrationDto);
         newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
 
-        Role userRole = roleRepository.findByName("USER")
+        Role userRole = roleRepository.findRoleByName("USER")
                 .orElseGet(() -> {
                     Role newRole = new Role();
                     newRole.setName("USER");
@@ -102,12 +103,12 @@ public class UserService {
      *
      * @param id The ID of the user to find.
      * @return The UserResponseDTO of the found user.
-     * @throws ResourceNotFoundException if the user is not found.
+     * @throws ResponseStatusException if the user is not found.
      */
     @Transactional(readOnly = true)
     public UserResponseDTO findUserDtoById(Long id) {
         User user = userRepository.findUserById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + id));
         return userMapper.userToUserResponseDto(user);
     }
 
@@ -128,12 +129,12 @@ public class UserService {
      *
      * @param username The username of the user to find.
      * @return The UserResponseDTO of the found user.
-     * @throws ResourceNotFoundException if the user is not found.
+     * @throws ResponseStatusException if the user is not found.
      */
     @Transactional(readOnly = true)
     public UserResponseDTO findUserDtoByUsername(String username) {
         User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with username: " + username));
         return userMapper.userToUserResponseDto(user);
     }
 
@@ -142,12 +143,12 @@ public class UserService {
      *
      * @param email The email of the user to find.
      * @return The UserResponseDTO of the found user.
-     * @throws ResourceNotFoundException if the user is not found.
+     * @throws ResponseStatusException if the user is not found.
      */
     @Transactional(readOnly = true)
     public UserResponseDTO findUserDtoByEmail(String email) {
         User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with email: " + email));
         return userMapper.userToUserResponseDto(user);
     }
 
@@ -157,13 +158,13 @@ public class UserService {
      * @param id The ID of the user to update.
      * @param userRequestDTO DTO containing the fields to update.
      * @return The UserResponseDTO of the updated user.
-     * @throws ResourceNotFoundException if the user to update is not found.
+     * @throws ResponseStatusException if the user to update is not found.
      * @throws IllegalArgumentException if the new email is already in use by another user.
      */
     @Transactional
     public UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO) {
         User existingUser = userRepository.findUserById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + id));
 
         if (userRequestDTO.getEmail() != null && !userRequestDTO.getEmail().equals(existingUser.getEmail())) {
             if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
@@ -180,12 +181,12 @@ public class UserService {
      * Deletes a user by their ID.
      *
      * @param id The ID of the user to delete.
-     * @throws ResourceNotFoundException if the user to delete is not found.
+     * @throws  ResponseStatusException if the user to delete is not found.
      */
     @Transactional
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found with id: " + id + ". Could not delete.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + id + ". Could not delete.");
         }
         userRepository.deleteById(id);
     }
@@ -195,12 +196,12 @@ public class UserService {
      *
      * @param id The ID of the user to find.
      * @return The found User entity.
-     * @throws ResourceNotFoundException if the user is not found.
+     * @throws ResponseStatusException if the user is not found.
      */
     @Transactional(readOnly = true)
     public User findUserEntityById(Long id) {
         return userRepository.findUserById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + id));
     }
 
     /**
@@ -208,12 +209,12 @@ public class UserService {
      *
      * @param username The username of the user to find.
      * @return The found User entity.
-     * @throws ResourceNotFoundException if the user is not found.
+     * @throws ResponseStatusException if the user is not found.
      */
     @Transactional(readOnly = true)
     public User findUserEntityByUsername(String username) {
         return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found with username: " + username));
     }
 
     /**
@@ -221,11 +222,11 @@ public class UserService {
      *
      * @param email The email of the user to find.
      * @return The found User entity.
-     * @throws ResourceNotFoundException if the user is not found.
+     * @throws ResponseStatusException if the user is not found.
      */
     @Transactional(readOnly = true)
     public User findUserEntityByEmail(String email) {
         return userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with email: " + email));
     }
 }

@@ -9,7 +9,6 @@ import org.example.rentify.dto.registration.UserRegistrationDTO;
 import org.example.rentify.dto.request.UserRequestDTO;
 import org.example.rentify.dto.response.UserResponseDTO;
 import org.example.rentify.dto.response.MessageResponseDTO;
-import org.example.rentify.exception.ResourceNotFoundException;
 import org.example.rentify.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 /*
  * UserController is a REST controller that handles user-related operations.
@@ -54,14 +54,13 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Error: User not authenticated."));
         }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         try {
             UserResponseDTO userResponseDTO = userService.findUserDtoByUsername(userDetails.getUsername());
             return ResponseEntity.ok(userResponseDTO);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResponseStatusException e) {
             logger.warn("Could not find authenticated user: {}", userDetails.getUsername(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponseDTO("Error: User not found."));
         }
@@ -80,7 +79,7 @@ public class UserController {
         try {
             UserResponseDTO userResponseDTO = userService.findUserDtoById(id);
             return ResponseEntity.ok(userResponseDTO);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResponseStatusException e) {
             logger.warn("User not found with id: {}", id, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponseDTO("Error: User not found with id " + id));
         }
@@ -99,7 +98,7 @@ public class UserController {
         try {
             UserResponseDTO userResponseDTO = userService.findUserDtoByUsername(username);
             return ResponseEntity.ok(userResponseDTO);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResponseStatusException e) {
             logger.warn("User not found with username: {}", username, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponseDTO("Error: User not found with username " + username));
         }
@@ -118,7 +117,7 @@ public class UserController {
         try {
             UserResponseDTO userResponseDTO = userService.findUserDtoByEmail(email);
             return ResponseEntity.ok(userResponseDTO);
-        } catch (ResourceNotFoundException e) {
+        } catch (ResponseStatusException e) {
             logger.warn("User not found with email: {}", email, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponseDTO("Error: User not found with email " + email));
         }
@@ -133,7 +132,7 @@ public class UserController {
     @Operation(summary = "Get all users", description = "Retrieves a paginated list of all users. Requires ADMIN role.")
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllUsers(@PageableDefault(size = 10, sort = "username") Pageable pageable) {
+    public ResponseEntity<?> getAllUsers(@PageableDefault Pageable pageable) {
         try {
             Page<UserResponseDTO> userResponseDTOPage = userService.findAllUsers(pageable);
             return ResponseEntity.ok(userResponseDTOPage);
@@ -176,7 +175,7 @@ public class UserController {
      *
      * @param id The ID of the user to update.
      * @param userRequestDTO The updated user details.
-     * @return The updated user's details or an error message if update fails.
+     * @return The updated user's details or an error message if an update fails.
      */
     @Operation(summary = "Update user by ID", description = "Updates an existing user's details. Requires ADMIN role or for the user to be updating their own data.")
     @PutMapping("/{id}")
@@ -190,7 +189,7 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid data for updating user with id {}: {}", id, e.getMessage());
             return ResponseEntity.badRequest().body(new MessageResponseDTO("Error: " + e.getMessage()));
-        } catch (ResourceNotFoundException e) {
+        } catch (ResponseStatusException e) {
             logger.error("Error updating user with id {}: {}", id, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponseDTO("Error: User not found with id " + id));
         }
@@ -209,7 +208,7 @@ public class UserController {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok(new MessageResponseDTO("User with ID " + id + " deleted successfully."));
-        } catch (ResourceNotFoundException e) {
+        } catch (ResponseStatusException e) {
             logger.warn("User not found for deletion with id: {}", id, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponseDTO("Error: User not found with id " + id + ". Could not delete."));
         }
