@@ -8,6 +8,7 @@ import org.example.rentify.dto.registration.UserRegistrationDTO;
 import org.example.rentify.dto.request.LoginRequestDTO;
 import org.example.rentify.dto.response.JwtResponseDTO;
 import org.example.rentify.dto.response.MessageResponseDTO;
+import org.example.rentify.dto.response.UserResponseDTO;
 import org.example.rentify.entity.User;
 import org.example.rentify.security.jwt.JwtUtil;
 import org.example.rentify.service.UserService;
@@ -82,7 +83,6 @@ public class AuthController {
                     userDetails.getEmail(),
                     roles
             ));
-
         } catch (BadCredentialsException e) {
             logger.warn("Login attempt failed for user '{}': Invalid credentials", loginRequest.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Error: Invalid username or password!"));
@@ -95,17 +95,18 @@ public class AuthController {
     /**
      * Registers a new user with the provided details.
      *
-     * @param signUpRequest The registration request containing user details.
-     * @return A success message if registration is successful, or an error message if it fails.
+     * @param signUpRequest The UserRegistrationDTO containing user details.
+     * @return The registered user's details or an error message if registration fails.
+     * @throws IllegalArgumentException if the username or email is already taken.
      */
     @Operation(summary = "User Registration", description = "Registers a new user based on their provided details.")
     @Parameter(name = "signUpRequest", description = "Registration request containing user details")
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationDTO signUpRequest) {
         try {
-            User registeredUser = userService.registerNewUser(signUpRequest);
-            logger.info("User registered successfully: {}", registeredUser.getUsername());
-            return ResponseEntity.status(HttpStatus.CREATED).body(new MessageResponseDTO("User registered successfully!"));
+            UserResponseDTO registeredUserDto = userService.registerNewUser(signUpRequest);
+            logger.info("User registered successfully: {}", registeredUserDto.getUsername());
+            return ResponseEntity.status(HttpStatus.CREATED).body(registeredUserDto);
         } catch (IllegalArgumentException e) {
             logger.warn("User registration failed: {}", e.getMessage());
             return ResponseEntity.badRequest().body(new MessageResponseDTO(e.getMessage()));
