@@ -10,52 +10,98 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataAccessException;
 
 import java.util.stream.Collectors;
 
+/**
+ * Global exception handler for the Rentify application.
+ * This class handles various exceptions that may occur during the execution of the application.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<MessageResponseDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        logger.warn("Malformed JSON request: {}", ex.getMessage());
-        String errorMessage = "Error: Malformed JSON request. Please ensure the JSON syntax is correct.";
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new MessageResponseDTO(errorMessage));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<MessageResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
-        String errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new MessageResponseDTO("Validation Error: " + errors));
-    }
-
-
+    /**
+     * Handles ResponseStatusException and returns a custom error message.
+     *
+     * @param ex the ResponseStatusException
+     * @return a ResponseEntity with the error message
+     */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<MessageResponseDTO> handleResponseStatusException(ResponseStatusException ex) {
-        logger.warn("ResponseStatusException occurred: Status {}, Reason {}", ex.getStatusCode(), ex.getReason());
+        logger.warn("ResponseStatusException occurred: Status {}, Reason: {}", ex.getStatusCode(), ex.getReason(), ex);
         return ResponseEntity
                 .status(ex.getStatusCode())
-                .body(new MessageResponseDTO(ex.getReason()));
+                .body(new MessageResponseDTO(ex.getReason() != null ? ex.getReason() : "Error processing request."));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class) // As used in RoleService/Controller
+    /**
+     * Handles IllegalArgumentException and returns a custom error message.
+     *
+     * @param ex the IllegalArgumentException
+     * @return a ResponseEntity with the error message
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<MessageResponseDTO> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("Illegal argument: {}", ex.getMessage());
+        logger.warn("Illegal argument provided: {}", ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new MessageResponseDTO(ex.getMessage()));
     }
 
+    /**
+     * Handles MethodArgumentNotValidException and returns a custom error message.
+     *
+     * @param ex the MethodArgumentNotValidException
+     * @return a ResponseEntity with the error message
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<MessageResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        String errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        logger.warn("Validation error: {}", errors, ex);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDTO("Validation Error: " + errors));
+    }
 
+    /**
+     * Handles HttpMessageNotReadableException and returns a custom error message.
+     *
+     * @param ex the HttpMessageNotReadableException
+     * @return a ResponseEntity with the error message
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<MessageResponseDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        logger.warn("Malformed JSON request: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDTO("Error: Malformed JSON request. Please check the JSON syntax."));
+    }
+
+    /**
+     * Handles DataAccessException and returns a custom error message.
+     *
+     * @param ex the DataAccessException
+     * @return a ResponseEntity with the error message
+     */
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<MessageResponseDTO> handleDataAccessException(DataAccessException ex) {
+        logger.error("A database access error occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponseDTO("Error: A database error occurred. Please try again later."));
+    }
+
+    /**
+     * Handles generic exceptions and returns a custom error message.
+     *
+     * @param ex the Exception
+     * @return a ResponseEntity with the error message
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<MessageResponseDTO> handleGenericException(Exception ex) {
         logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
