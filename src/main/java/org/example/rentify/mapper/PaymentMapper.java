@@ -22,8 +22,8 @@ public interface PaymentMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "booking", ignore = true)
-    @Mapping(target = "paymentDate", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "paymentStatus", expression = "java(org.example.rentify.entity.enums.PaymentStatus.PENDING)")
+    @Mapping(target = "paymentDate", ignore = true)
+    @Mapping(target = "paymentStatus", ignore = true)
     Payment paymentRequestDtoToPayment(PaymentRequestDTO paymentRequestDTO);
 
     /**

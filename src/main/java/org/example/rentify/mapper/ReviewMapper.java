@@ -23,7 +23,7 @@ public interface ReviewMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "property", ignore = true)
     @Mapping(target = "booking", ignore = true)
-    @Mapping(target = "reviewDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "reviewDate", ignore = true)
     Review reviewRequestDtoToReview(ReviewRequestDTO reviewRequestDTO);
 
     /**

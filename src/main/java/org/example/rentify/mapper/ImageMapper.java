@@ -22,7 +22,7 @@ public interface ImageMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "property", ignore = true)
-    @Mapping(target = "uploadDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "uploadDate", ignore = true)
     Image imageRequestDtoToImage(ImageRequestDTO imageRequestDTO);
 
     /**

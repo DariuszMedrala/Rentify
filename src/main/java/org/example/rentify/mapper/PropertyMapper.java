@@ -22,7 +22,7 @@ public interface PropertyMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", ignore = true)
-    @Mapping(target = "creationDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "creationDate", ignore = true)
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "availability", source = "availability")

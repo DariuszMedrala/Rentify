@@ -27,7 +27,7 @@ public interface UserMapper {
     @Mapping(target = "properties", ignore = true)
     @Mapping(target = "bookings", ignore = true)
     @Mapping(target = "reviews", ignore = true)
-    @Mapping(target = "registrationDate", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "registrationDate", ignore = true)
     @Mapping(target = "enabled", constant = "true")
     @Mapping(target = "accountNonExpired", constant = "true")
     @Mapping(target = "accountNonLocked", constant = "true")
