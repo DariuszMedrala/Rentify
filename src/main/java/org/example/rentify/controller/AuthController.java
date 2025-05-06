@@ -1,7 +1,6 @@
 package org.example.rentify.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.rentify.dto.registration.UserRegistrationDTO;
@@ -23,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,7 +59,6 @@ public class AuthController {
      * @return A JWT token if authentication is successful, or an error message if it fails.
      */
     @Operation(summary = "User Login", description = "Authenticates a user based on their username and password.")
-    @Parameter(name = "loginRequest", description = "Login request containing username and password")
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequestDTO loginRequest) {
         try {
@@ -68,27 +67,41 @@ public class AuthController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtil.generateToken(authentication);
+            Object principal = authentication.getPrincipal();
+            String username;
+            Long userId;
+            String email;
 
-            User userDetails = (User) authentication.getPrincipal();
-            List<String> roles = userDetails.getAuthorities().stream()
+            if (principal instanceof User castedUser) {
+                username = castedUser.getUsername();
+                userId = castedUser.getId();
+                email = castedUser.getEmail();
+            } else if (principal instanceof UserDetails springUser) {
+                username = springUser.getUsername();
+                User appUser = userService.findUserEntityByUsername(username);
+                userId = appUser.getId();
+                email = appUser.getEmail();
+            } else {
+                logger.error("Unexpected principal type: {}", principal.getClass().getName());
+                throw new IllegalStateException("Unexpected principal type in authentication object");
+            }
+
+            List<String> roles = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
 
-            logger.info("User '{}' logged in successfully.", userDetails.getUsername());
+            logger.info("User '{}' logged in successfully.", username);
 
             return ResponseEntity.ok(new JwtResponseDTO(
                     jwt,
-                    userDetails.getId(),
-                    userDetails.getUsername(),
-                    userDetails.getEmail(),
+                    userId,
+                    username,
+                    email,
                     roles
             ));
         } catch (BadCredentialsException e) {
             logger.warn("Login attempt failed for user '{}': Invalid credentials", loginRequest.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Error: Invalid username or password!"));
-        } catch (Exception e) {
-            logger.error("Error during login for user '{}': {}", loginRequest.getUsername(), e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponseDTO("Error: An unexpected error occurred during login."));
         }
     }
 
@@ -97,23 +110,12 @@ public class AuthController {
      *
      * @param signUpRequest The UserRegistrationDTO containing user details.
      * @return The registered user's details or an error message if registration fails.
-     * @throws IllegalArgumentException if the username or email is already taken.
      */
     @Operation(summary = "User Registration", description = "Registers a new user based on their provided details.")
-    @Parameter(name = "signUpRequest", description = "Registration request containing user details")
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationDTO signUpRequest) {
-        try {
-            UserResponseDTO registeredUserDto = userService.registerNewUser(signUpRequest);
-            logger.info("User registered successfully: {}", registeredUserDto.getUsername());
-            return ResponseEntity.status(HttpStatus.CREATED).body(registeredUserDto);
-        } catch (IllegalArgumentException e) {
-            logger.warn("User registration failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(new MessageResponseDTO(e.getMessage()));
-        } catch (Exception e) {
-            logger.error("Error during user registration: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponseDTO("Error: An unexpected error occurred during registration."));
-        }
+    public ResponseEntity<UserResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO signUpRequest) {
+        UserResponseDTO registeredUserDto = userService.registerNewUser(signUpRequest);
+        logger.info("User registered successfully: {}", registeredUserDto.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUserDto);
     }
 }
