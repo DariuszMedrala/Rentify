@@ -22,7 +22,7 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "streetAddress", nullable = false)
+    @Column(name = "street_Address", nullable = false)
     private String streetAddress;
 
     @Column(name = "city", nullable = false)

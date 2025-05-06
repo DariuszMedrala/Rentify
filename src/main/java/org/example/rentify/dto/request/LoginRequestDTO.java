@@ -18,8 +18,10 @@ import lombok.AllArgsConstructor;
 public class LoginRequestDTO {
 
     @NotBlank(message = "Username cannot be blank")
+    @Schema(example = "john_doe")
     private String username;
 
     @NotBlank(message = "Password cannot be blank")
+    @Schema(example = "passWord123@")
     private String password;
 }
