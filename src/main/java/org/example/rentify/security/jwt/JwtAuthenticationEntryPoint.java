@@ -1,7 +1,6 @@
 package org.example.rentify.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -33,12 +32,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
      * @param response the HttpServletResponse object
      * @param authException the AuthenticationException that occurred
      * @throws IOException if an input or output exception occurs
-     * @throws ServletException if a servlet exception occurs
      */
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
-                         AuthenticationException authException) throws IOException, ServletException {
+                         AuthenticationException authException) throws IOException {
 
         logger.error("Unauthorized error: {}", authException.getMessage());
 

@@ -79,7 +79,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (ExpiredJwtException e) {
             logger.warn("JWT token is expired: {}", e.getMessage());
-
         } catch (UnsupportedJwtException e) {
             logger.warn("JWT token is unsupported: {}", e.getMessage());
         } catch (MalformedJwtException e) {
@@ -91,7 +90,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e.getMessage(), e);
         }
-
         filterChain.doFilter(request, response);
     }
 

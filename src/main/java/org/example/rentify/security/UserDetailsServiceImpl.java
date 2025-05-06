@@ -16,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    UserRepository userRepository;
-
+    private final UserRepository userRepository;
     User user;
+
+    public UserDetailsServiceImpl(@Autowired UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * This method loads user details by username.
