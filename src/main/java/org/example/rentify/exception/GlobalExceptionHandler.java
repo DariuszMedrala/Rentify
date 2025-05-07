@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -108,5 +109,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new MessageResponseDTO("Error: An unexpected internal server error occurred."));
+    }
+
+    /**
+     * Handles AccessDeniedException and returns a custom error message.
+     *
+     * @param ex the AccessDeniedException
+     * @return a ResponseEntity with an appropriate error message and FORBIDDEN status
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<MessageResponseDTO> handleAccessDeniedException(AccessDeniedException ex) {
+        logger.warn("Access Denied: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new MessageResponseDTO("Error: Access denied. You do not have permission to access this resource."));
     }
 }

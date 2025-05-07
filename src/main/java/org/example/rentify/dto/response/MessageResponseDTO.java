@@ -15,6 +15,6 @@ import lombok.NoArgsConstructor;
  */
 public class MessageResponseDTO {
 
-    @Schema(example = "Property created successfully")
+    @Schema(example = "Action completed successfully")
     private String message;
 }
