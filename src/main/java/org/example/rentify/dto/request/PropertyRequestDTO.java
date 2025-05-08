@@ -28,8 +28,8 @@ public class PropertyRequestDTO {
     @Schema(example = "A beautiful beach house with stunning ocean views.")
     private String description;
 
-    @NotNull(message = "Property price cannot be null")
-    @Schema(example = "100.0")
+    @NotNull(message = "Property type cannot be null")
+    @Schema(example = "HOUSE")
     private PropertyType propertyType;
 
     @NotNull(message = "Property area cannot be null")
@@ -51,8 +51,4 @@ public class PropertyRequestDTO {
     @NotNull(message = "Address cannot be null")
     @Valid
     private AddressRequestDTO address;
-
-    @NotNull(message = "Owner ID cannot be null")
-    @Schema(example = "1")
-    private Long ownerId;
 }
