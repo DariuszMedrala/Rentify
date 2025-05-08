@@ -115,7 +115,10 @@ public class UserController {
     @Operation(summary = "Get all users", description = "Retrieves a paginated list of all users. Requires ADMIN role.")
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(@PageableDefault Pageable pageable) {
+    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(@Parameter(
+            name = "pageable",
+            description = "Pageable object containing pagination information",
+            example = "{\"page\": 0, \"size\": 10, \"sort\": \"username,asc\"}") @PageableDefault Pageable pageable) {
         Page<UserResponseDTO> userResponseDTOPage = userService.findAllUsers(pageable);
         return ResponseEntity.ok(userResponseDTOPage);
     }

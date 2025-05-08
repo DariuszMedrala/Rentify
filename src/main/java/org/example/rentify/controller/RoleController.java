@@ -48,7 +48,10 @@ public class RoleController {
     @Operation(summary = "Get all roles", description = "Retrieve a paginated list of all roles. Requires ADMIN role.")
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<RoleResponseDTO>> getAllRoles(Pageable pageable) {
+    public ResponseEntity<Page<RoleResponseDTO>> getAllRoles(@Parameter(
+            name = "pageable",
+            description = "Pageable object containing pagination information",
+            example = "{\"page\": 0, \"size\": 10, \"sort\": \"name,asc\"}") Pageable pageable) {
         Page<RoleResponseDTO> roleResponseDTOPage = roleService.findAllRoles(pageable);
         return ResponseEntity.ok(roleResponseDTOPage);
     }
