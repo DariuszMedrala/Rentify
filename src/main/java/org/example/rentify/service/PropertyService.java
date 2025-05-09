@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /*
@@ -257,6 +258,7 @@ public class PropertyService {
                 });
         return property.getOwner().getUsername().equals(username);
     }
+
     /**
      * Retrieves a property entity by its ID.
      *
@@ -265,7 +267,7 @@ public class PropertyService {
      * @throws IllegalArgumentException If the ID is null or not positive.
      * @throws ResponseStatusException  If the property with the given ID is not found in the database.
      */
-
+    @Transactional(readOnly = true)
     public Property getPropertyEntityById(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Property ID must be a positive number.");
@@ -278,5 +280,80 @@ public class PropertyService {
                 });
         logger.info("Property found successfully with ID number: {}", id);
         return property;
+    }
+
+    /**
+     * Updates price per day of a property by its ID.
+     * @param id The ID of the property to update.
+     * @param pricePerDay The new price per day.
+     * @throws IllegalArgumentException If the ID is null or not positive, or if the price per day is null or not positive.
+     */
+    @Transactional
+    public void updatePropertyPricePerDay(Long id, BigDecimal pricePerDay) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Property ID must be a positive number.");
+        }
+        if (pricePerDay == null || pricePerDay.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price per day must be a positive number.");
+        }
+        logger.debug("Attempting to update property with ID: {} and price per day: {}", id, pricePerDay);
+        Property property = propertyRepository.findPropertyById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Property can't be found with given ID: {}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found with ID: " + id);
+                });
+        property.setPricePerDay(pricePerDay);
+        propertyRepository.save(property);
+        logger.info("Property with ID {} updated successfully with new price per day: {}", id, pricePerDay);
+    }
+
+    /**
+     * Updates availability of a property by its ID.
+     * @param id The ID of the property to update.
+     * @param availability The new availability status.
+     * @throws IllegalArgumentException If the ID is null or not positive, or if the availability is null.
+     */
+    @Transactional
+    public void updatePropertyAvailability(Long id, Boolean availability) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Property ID must be a positive number.");
+        }
+        if (availability == null) {
+            throw new IllegalArgumentException("Availability cannot be null.");
+        }
+        logger.debug("Attempting to update property with ID: {} and availability: {}", id, availability);
+        Property property = propertyRepository.findPropertyById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Property cant be found with given ID: {}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found with ID: " + id);
+                });
+        property.setAvailability(availability);
+        propertyRepository.save(property);
+        logger.info("Property with ID {} updated successfully with new availability: {}", id, availability);
+    }
+
+    /**
+     * Updates description of a property by its ID.
+     * @param id The ID of the property to update.
+     * @param description The new description.
+     * @throws IllegalArgumentException If the ID is null or not positive, or if the description is blank.
+     */
+    @Transactional
+    public void updatePropertyDescription(Long id, String description) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Property ID must be a positive number.");
+        }
+        if (!StringUtils.hasText(description)) {
+            throw new IllegalArgumentException("Description cannot be blank.");
+        }
+        logger.debug("Attempting to update property with ID: {} and description: {}", id, description);
+        Property property = propertyRepository.findPropertyById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Property cannot be found with given ID: {}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found with ID: " + id);
+                });
+        property.setDescription(description);
+        propertyRepository.save(property);
+        logger.info("Property with ID {} updated successfully with new description: {}", id, description);
     }
 }
