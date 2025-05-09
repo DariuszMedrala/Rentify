@@ -50,15 +50,4 @@ public interface PropertyMapper {
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "bookings", ignore = true)
     void updatePropertyFromDto(PropertyRequestDTO propertyRequestDTO, @MappingTarget Property property);
-
-    /**
-     * Sets the owner of a property.
-     *
-     * @param property The property to update
-     * @param owner The user who owns the property
-     */
-    @AfterMapping
-    default void setOwner(@MappingTarget Property property, User owner) {
-        property.setOwner(owner);
-    }
 }
