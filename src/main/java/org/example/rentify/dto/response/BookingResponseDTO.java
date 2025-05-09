@@ -24,7 +24,6 @@ public class BookingResponseDTO {
     @Schema(example = "1")
     private Long id;
     private PropertyResponseDTO property;
-    private UserResponseDTO user;
     @Schema(example = "2025-10-01")
     private LocalDate startDate;
     @Schema(example = "2025-10-10")
