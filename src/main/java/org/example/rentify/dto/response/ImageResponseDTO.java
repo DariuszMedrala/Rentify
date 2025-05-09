@@ -20,7 +20,6 @@ public class ImageResponseDTO {
 
     @Schema(example = "1")
     private Long id;
-    private PropertyResponseDTO property;
     @Schema(example = "https://example.com/image")
     private String imageUrl;
     @Schema(example = "Beautiful view of the property")

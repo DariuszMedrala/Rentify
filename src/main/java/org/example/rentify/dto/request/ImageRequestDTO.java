@@ -2,7 +2,6 @@ package org.example.rentify.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,10 +19,6 @@ import org.hibernate.validator.constraints.URL;
  * the client and server.
  */
 public class ImageRequestDTO {
-
-    @NotNull(message = "Property ID cannot be null")
-    @Schema(example = "1")
-    private Long propertyId;
 
     @NotBlank(message = "Image URL cannot be blank")
     @URL(message = "Invalid image URL format")
