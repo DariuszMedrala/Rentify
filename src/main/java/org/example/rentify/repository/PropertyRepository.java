@@ -29,12 +29,12 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     void deletePropertyById(Long id);
 
 
-   /**
+    /**
      * Finds properties by their type and availability status.
      *
      * @param propertyType the type of the properties
      * @param availability the availability status of the properties
-    *  @param pageable the pagination information
+     * @param pageable     the pagination information
      * @return aa page of properties with the specified type and availability status
      */
     Page<Property> findByPropertyTypeAndAvailability(PropertyType propertyType, Boolean availability, Pageable pageable);
@@ -43,9 +43,9 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      * Finds properties by country, city and availability status.
      *
      * @param addressCountry the country of the properties
-     * @param addressCity the city of the properties
-     * @param availability the availability status of the properties
-     * @param pageable the pagination information
+     * @param addressCity    the city of the properties
+     * @param availability   the availability status of the properties
+     * @param pageable       the pagination information
      * @return a page of properties with the specified country, city and availability status
      */
     Page<Property> findAllByAddress_CountryAndAddress_CityAndAvailability(String addressCountry, String addressCity, Boolean availability, Pageable pageable);

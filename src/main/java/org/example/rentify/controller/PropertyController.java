@@ -23,6 +23,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 
 /*
  * PropertyController is a REST controller for managing properties in the system.
@@ -207,7 +209,70 @@ public class PropertyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         propertyService.updateProperty(id, propertyRequestDTO);
-        logger.info("Property with ID {} updated successfully by user '{}'", id, authentication.getName());
+        logger.info("Property with ID {} updated successfully by owner '{}'", id, authentication.getName());
+        return ResponseEntity.ok(new MessageResponseDTO("Property with ID " + id + " updated successfully."));
+    }
+
+    /**
+     * Updates price per day of a property by its ID if logged-in user is the owner of the property or an admin.
+     * @param id the ID of the property to update
+     * @param pricePerDay the new price per day
+     * @param authentication the authentication object containing the currently authenticated user
+     * @return a success message or an error message if an update fails
+     */
+    @Operation(summary = "Update a property price per day", description = "Allows authenticated owner to update a property price per day.")
+    @PatchMapping("{id}/price_per_day/{pricePerDay}")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @propertyService.isOwner(#id, principal.username))")
+    public ResponseEntity<?> updatePropertyPricePerDay(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long id,
+                                                       @Parameter(description = "New price per day", in = ParameterIn.PATH) @PathVariable BigDecimal pricePerDay,
+                                                       Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        propertyService.updatePropertyPricePerDay(id, pricePerDay);
+        logger.info("Property with ID number {} updated successfully by owner '{}'", id, authentication.getName());
+        return ResponseEntity.ok(new MessageResponseDTO("Property with ID " + id + " updated successfully."));
+    }
+
+    /**
+     * Updates availability status of a property by its ID if logged-in user is the owner of the property or an admin.
+     * @param id the ID of the property to update
+     * @param availability the new availability status
+     * @param authentication the authentication object containing the currently authenticated user
+     * @return a success message or an error message if an update fails
+     */
+    @Operation(summary = "Update a property availability", description = "Allows authenticated owner to update a property availability.")
+    @PatchMapping("{id}/availability/{availability}")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @propertyService.isOwner(#id, principal.username))")
+    public ResponseEntity<?> updatePropertyAvailability(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long id,
+                                                         @Parameter(description = "New availability status", in = ParameterIn.PATH) @PathVariable Boolean availability,
+                                                         Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        propertyService.updatePropertyAvailability(id, availability);
+        logger.info("Property with given ID number {} updated successfully by owner '{}'", id, authentication.getName());
+        return ResponseEntity.ok(new MessageResponseDTO("Property with ID " + id + " updated successfully."));
+    }
+
+    /**
+     * Updates description of a property by its ID if logged-in user is the owner of the property or an admin.
+     * @param id the ID of the property to update
+     * @param description the new description
+     * @param authentication the authentication object containing the currently authenticated user
+     * @return a success message or an error message if an update fails
+     */
+    @Operation(summary = "Update a property description", description = "Allows authenticated owner to update a property description.")
+    @PatchMapping("{id}/description/{description}")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @propertyService.isOwner(#id, principal.username))")
+    public ResponseEntity<?> updatePropertyDescription(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long id,
+                                                         @Parameter(description = "New description", in = ParameterIn.PATH) @PathVariable String description,
+                                                         Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        propertyService.updatePropertyDescription(id, description);
+        logger.info("Property with given ID number {} updated with success by owner '{}'", id, authentication.getName());
         return ResponseEntity.ok(new MessageResponseDTO("Property with ID " + id + " updated successfully."));
     }
 }
