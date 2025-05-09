@@ -257,4 +257,26 @@ public class PropertyService {
                 });
         return property.getOwner().getUsername().equals(username);
     }
+    /**
+     * Retrieves a property entity by its ID.
+     *
+     * @param id The ID of the property to retrieve.
+     * @return The Property entity.
+     * @throws IllegalArgumentException If the ID is null or not positive.
+     * @throws ResponseStatusException  If the property with the given ID is not found in the database.
+     */
+
+    public Property getPropertyEntityById(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Property ID must be a positive number.");
+        }
+        logger.debug("Attempting to find property with ID number: {}", id);
+        Property property = propertyRepository.findPropertyById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Property not found with provided ID number: {}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found with ID: " + id);
+                });
+        logger.info("Property found successfully with ID number: {}", id);
+        return property;
+    }
 }
