@@ -184,20 +184,6 @@ public class PropertyController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        String username;
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            username = (String) principal;
-        } else {
-            logger.error("Unexpected principal type of: {}", principal.getClass().getName());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-        if (!propertyService.isOwner(id, username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("You are not allowed to delete this property."));
-        }
         propertyService.deletePropertyById(id);
         logger.info("Property with ID {} deleted successfully by user '{}'", id, authentication.getName());
         return ResponseEntity.ok(new MessageResponseDTO("Property with ID " + id + " deleted successfully."));
@@ -219,20 +205,6 @@ public class PropertyController {
                                             @Parameter(description = "Property request DTO containing property details") @Valid @RequestBody PropertyRequestDTO propertyRequestDTO) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String username;
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            username = (String) principal;
-        } else {
-            logger.error("Unexpected principal type: {}", principal.getClass().getName());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-        if (!propertyService.isOwner(id, username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDTO("You are not allowed to delete this property."));
         }
         propertyService.updateProperty(id, propertyRequestDTO);
         logger.info("Property with ID {} updated successfully by user '{}'", id, authentication.getName());
