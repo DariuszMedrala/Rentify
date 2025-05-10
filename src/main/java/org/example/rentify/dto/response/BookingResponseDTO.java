@@ -23,7 +23,6 @@ public class BookingResponseDTO {
 
     @Schema(example = "1")
     private Long id;
-    private PropertyResponseDTO property;
     @Schema(example = "2025-10-01")
     private LocalDate startDate;
     @Schema(example = "2025-10-10")
@@ -34,5 +33,4 @@ public class BookingResponseDTO {
     private LocalDateTime bookingDate;
     @Schema(example = "PENDING")
     private BookingStatus bookingStatus;
-    private PaymentResponseDTO payment;
 }
