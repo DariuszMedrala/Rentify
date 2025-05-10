@@ -43,5 +43,12 @@ public interface BookingMapper {
      * @param bookingRequestDTO the request DTO
      * @param booking the Booking entity to update
      */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "property", ignore = true)
+    @Mapping(target = "bookingDate", ignore = true)
+    @Mapping(target = "bookingStatus", ignore = true)
+    @Mapping(target = "payment", ignore = true)
+    @Mapping(target = "reviews", ignore = true)
     void updateBookingFromDto(BookingRequestDTO bookingRequestDTO, @MappingTarget Booking booking);
 }
