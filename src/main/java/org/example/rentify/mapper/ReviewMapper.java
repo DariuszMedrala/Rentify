@@ -32,6 +32,8 @@ public interface ReviewMapper {
      * @param review Review entity to convert
      * @return the converted ReviewResponseDTO
      */
+    @Mapping(target = "propertyId", source = "property.id")
+    @Mapping(target = "bookingId", source = "booking.id")
     ReviewResponseDTO reviewToReviewResponseDto(Review review);
 
     /**

@@ -26,7 +26,7 @@ public interface BookingMapper {
     @Mapping(target = "bookingStatus", ignore = true)
     @Mapping(target = "totalPrice", ignore = true)
     @Mapping(target = "payment", ignore = true)
-    @Mapping(target = "reviews", ignore = true)
+    @Mapping(target = "review", ignore = true)
     Booking bookingRequestDtoToBooking(BookingRequestDTO bookingRequestDTO);
 
     /**
@@ -49,6 +49,7 @@ public interface BookingMapper {
     @Mapping(target = "bookingDate", ignore = true)
     @Mapping(target = "bookingStatus", ignore = true)
     @Mapping(target = "payment", ignore = true)
-    @Mapping(target = "reviews", ignore = true)
+    @Mapping(target = "review", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
     void updateBookingFromDto(BookingRequestDTO bookingRequestDTO, @MappingTarget Booking booking);
 }
