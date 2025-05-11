@@ -19,19 +19,7 @@ import lombok.NoArgsConstructor;
  * the client and server.
  */
 public class ReviewRequestDTO {
-
-    @NotNull(message = "User ID cannot be null")
-    @Schema(example = "123")
-    private Long userId;
-
-    @NotNull(message = "Property ID cannot be null")
-    @Schema(example = "456")
-    private Long propertyId;
-
-    @NotNull(message = "Booking ID cannot be null")
-    @Schema(example = "789")
-    private Long bookingId;
-
+    
     @NotNull(message = "Rating cannot be null")
     @Schema(example = "4")
     @Min(value = 1, message = "Rating must be at least 1")

@@ -20,9 +20,10 @@ public class ReviewResponseDTO {
 
     @Schema(example = "1")
     private Long id;
-    private UserResponseDTO user;
-    private PropertyResponseDTO property;
-    private BookingResponseDTO booking;
+    @Schema(example = "2")
+    private Long propertyId;
+    @Schema(example = "1")
+    private Long bookingId;
     @Schema(example = "5")
     private int rating;
     @Schema(example = "This is a great property!")
