@@ -9,6 +9,7 @@ import org.example.rentify.entity.enums.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "payments")
@@ -46,4 +47,16 @@ public class Payment {
 
     @Column(name = "transaction_id")
     private String transactionId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Payment payment = (Payment) o;
+        return Objects.equals(id, payment.id) && Objects.equals(paymentDate, payment.paymentDate) && Objects.equals(amount, payment.amount) && paymentMethod == payment.paymentMethod && paymentStatus == payment.paymentStatus && Objects.equals(transactionId, payment.transactionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, paymentDate, amount, paymentMethod, paymentStatus, transactionId);
+    }
 }

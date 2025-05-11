@@ -10,6 +10,7 @@ import org.example.rentify.entity.enums.PropertyType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "properties")
@@ -72,4 +73,15 @@ public class Property {
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Property property = (Property) o;
+        return Objects.equals(id, property.id) && Objects.equals(title, property.title) && Objects.equals(description, property.description) && propertyType == property.propertyType && Objects.equals(area, property.area) && Objects.equals(numberOfRooms, property.numberOfRooms) && Objects.equals(pricePerDay, property.pricePerDay) && Objects.equals(availability, property.availability) && Objects.equals(creationDate, property.creationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, propertyType, area, numberOfRooms, pricePerDay, availability, creationDate);
+    }
 }

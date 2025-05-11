@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "images")
@@ -35,4 +36,16 @@ public class Image {
 
     @Column(name = "upload_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime uploadDate;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Image image = (Image) o;
+        return Objects.equals(id, image.id) && Objects.equals(imageUrl, image.imageUrl) && Objects.equals(description, image.description) && Objects.equals(uploadDate, image.uploadDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, imageUrl, description, uploadDate);
+    }
 }

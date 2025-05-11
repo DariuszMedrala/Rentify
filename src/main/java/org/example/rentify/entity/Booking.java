@@ -10,7 +10,7 @@ import org.example.rentify.entity.enums.BookingStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "bookings")
@@ -56,6 +56,18 @@ public class Booking {
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
-    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews;
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Review review;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+        return Objects.equals(id, booking.id) && Objects.equals(startDate, booking.startDate) && Objects.equals(endDate, booking.endDate) && Objects.equals(totalPrice, booking.totalPrice) && Objects.equals(bookingDate, booking.bookingDate) && bookingStatus == booking.bookingStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, startDate, endDate, totalPrice, bookingDate, bookingStatus);
+    }
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -31,7 +32,7 @@ public class Review {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @ManyToOne
+    @OneToOne()
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
@@ -43,4 +44,16 @@ public class Review {
 
     @Column(name = "review_date", nullable = false)
     private LocalDateTime reviewDate;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Review review = (Review) o;
+        return rating == review.rating && Objects.equals(id, review.id) && Objects.equals(comment, review.comment) && Objects.equals(reviewDate, review.reviewDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, rating, comment, reviewDate);
+    }
 }
