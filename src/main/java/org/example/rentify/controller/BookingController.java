@@ -2,6 +2,7 @@ package org.example.rentify.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.rentify.dto.request.BookingRequestDTO;
@@ -79,7 +80,7 @@ public class BookingController {
      */
     @Operation(summary = "Get all bookings for given property ID", description = "Retrieves all bookings for a given property ID.")
     @GetMapping("/{propertyID}/all")
-    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsForProperty(@Parameter(description = "Property ID") @PathVariable Long propertyID) {
+    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsForProperty(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID) {
         List<BookingResponseDTO> bookings = bookingService.getAllBookingsByPropertyId(propertyID);
         return ResponseEntity.ok(bookings);
     }
@@ -95,10 +96,10 @@ public class BookingController {
      */
     @Operation(summary = "Allows the owner of a property to accept or reject a booking request",
             description = "Allows the owner of a property to accept or reject a booking request.")
-    @PatchMapping("/{propertyID}/{bookingID}/accept")
+    @PatchMapping("/{propertyID}/{bookingID}/booking-status")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @propertyService.isOwner(#propertyID, principal.username))")
-    public ResponseEntity<BookingResponseDTO> acceptBooking(@Parameter(description = "Property ID") @PathVariable Long propertyID,
-                                                            @Parameter(description = "Booking ID") @PathVariable Long bookingID,
+    public ResponseEntity<BookingResponseDTO> acceptBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID,
+                                                            @Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
                                                             @Parameter(description = "Booking status") @RequestParam BookingStatus bookingStatus,
                                                             Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
@@ -121,8 +122,8 @@ public class BookingController {
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') " +
             "or @propertyService.isOwner(#propertyID, principal.username)" +
             "or @bookingService.isBookingOwner(#bookingID, principal.username))")
-    public ResponseEntity<?> deleteBooking(@Parameter(description = "Property ID") @PathVariable Long propertyID,
-                                           @Parameter(description = "Booking ID") @PathVariable Long bookingID,
+    public ResponseEntity<?> deleteBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID,
+                                           @Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
                                            Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -144,7 +145,7 @@ public class BookingController {
     @PutMapping("/{bookingID}/update")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') " +
             "or @bookingService.isBookingOwner(#bookingID, principal.username))")
-    public ResponseEntity<BookingResponseDTO> updateBooking(@Parameter(description = "Booking ID") @PathVariable Long bookingID,
+    public ResponseEntity<BookingResponseDTO> updateBooking(@Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
                                                             @Parameter(description = "Booking request DTO") @Valid @RequestBody BookingRequestDTO bookingRequestDTO,
                                                             Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {

@@ -27,4 +27,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      */
     List<Review> findByPropertyId(Long propertyId);
 
+    /**
+     * Finds reviews by the booking ID.
+     *
+     * @param bookingId the ID of the booking
+     * @return a list of reviews for the specified booking
+     */
+    Review findByBookingId(Long bookingId);
+
+    /**
+     * Deletes reviews by the booking ID.
+     *
+     * @param reviewId the ID of the booking
+     */
+    void deleteReviewById(Long reviewId);
 }
