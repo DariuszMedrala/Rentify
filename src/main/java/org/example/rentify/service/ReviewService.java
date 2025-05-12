@@ -1,20 +1,19 @@
 package org.example.rentify.service;
 
 import org.example.rentify.dto.request.ReviewRequestDTO;
+import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.dto.response.ReviewResponseDTO;
 import org.example.rentify.entity.Booking;
 import org.example.rentify.entity.Review;
 import org.example.rentify.entity.User;
 import org.example.rentify.entity.enums.BookingStatus;
 import org.example.rentify.mapper.ReviewMapper;
-
 import org.example.rentify.repository.BookingRepository;
 import org.example.rentify.repository.PropertyRepository;
 import org.example.rentify.repository.ReviewRepository;
 import org.example.rentify.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +21,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * ReviewService is a service class that handles review-related operations.
+ * It provides methods to create, update, delete, and retrieve reviews for bookings.
+ */
 @Service
 public class ReviewService {
 
@@ -44,23 +47,19 @@ public class ReviewService {
      * Retrieves reviews for a specific booking by its ID.
      *
      * @param bookingId the ID of the booking
-     * @param username  the username of the user making the request
      * @throws ResponseStatusException if the booking is not found, or if the reviews are not found
      * @throws IllegalArgumentException if the booking ID or username is null or negative
      * @return a ReviewResponseDTO containing the reviews for the specified booking
      */
     @Transactional(readOnly = true)
-    public ReviewResponseDTO getReviewsByBookingId(Long bookingId, String username) {
-        if (bookingId == null || bookingId <= 0 || username == null) {
+    public ReviewResponseDTO getReviewsByBookingId(Long bookingId) {
+        if (bookingId == null || bookingId <= 0) {
             throw new IllegalArgumentException("Booking ID and Username cannot be null or negative");
         }
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
         if (booking.getReview() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No reviews found for this booking");
-        }
-        if (!booking.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("You do not have permission to access this booking's reviews");
         }
         Review Review = reviewRepository.findByBookingId(bookingId);
         return reviewMapper.reviewToReviewResponseDto(Review);
@@ -71,14 +70,10 @@ public class ReviewService {
      *
      * @param username the username of the user
      * @throws ResponseStatusException if the user is not found, or if no reviews are found
-     * @throws IllegalArgumentException if the username is null
      * @return a list of ReviewResponseDTOs containing all reviews made by the specified user
      */
     @Transactional(readOnly = true)
     public List<ReviewResponseDTO> getAllReviewsByUser(String username) {
-        if (username == null) {
-            throw new IllegalArgumentException("Username cannot be null");
-        }
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -95,7 +90,7 @@ public class ReviewService {
      * Retrieves all reviews for a specific property by its ID.
      *
      * @param propertyId the ID of the property
-     * @throws ResponseStatusException if no reviews are found for the property
+     * @throws ResponseStatusException if no reviews are found for the property, or if the property is not found
      * @throws IllegalArgumentException if the property ID is null or negative
      * @return a list of ReviewResponseDTOs containing all reviews for the specified property
      */
@@ -119,23 +114,20 @@ public class ReviewService {
     /**
      * Creates a new review for a specific booking.
      *
-     * @param bookingId        the ID of the booking
-     * @param reviewRequestDTO the review request data transfer object
-     * @param username         the username of the user making the request
-     * @throws ResponseStatusException if the booking is not found, or if a review already exists for this booking
-     * @throws IllegalArgumentException if the booking ID, review request DTO, or username is null or negative
-     * @return a ReviewResponseDTO containing the created review
+     * @param bookingId the ID of the booking
+     * @param reviewRequestDTO the DTO containing review data
+     * @throws ResponseStatusException if the booking is not found, or if the review already exists
+     * @throws IllegalArgumentException if the booking ID or review request DTO is null or negative
+     * @return a MessageResponseDTO with a message if the creation was successful
      */
     @Transactional
-    public ReviewResponseDTO createReview(Long bookingId, ReviewRequestDTO reviewRequestDTO, String username) {
-        if (bookingId == null || bookingId <= 0 || reviewRequestDTO == null || username == null) {
-            throw new IllegalArgumentException("Booking ID, Review Response DTO and Username cannot be null or negative");
+    public MessageResponseDTO createReview(Long bookingId, ReviewRequestDTO reviewRequestDTO) {
+        if (bookingId == null || bookingId <= 0 || reviewRequestDTO == null) {
+            throw new IllegalArgumentException("Booking ID, Review Response DTO cannot be null or negative");
         }
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-        if (!booking.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("You do not have permission to create a review for this booking");
-        }
+
         if (booking.getReview() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Review already exists for this booking");
         }
@@ -147,103 +139,111 @@ public class ReviewService {
         review.setUser(booking.getUser());
         review.setProperty(booking.getProperty());
         review.setReviewDate(LocalDateTime.now());
-        return reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        reviewRepository.save(review);
+        return new MessageResponseDTO("Review created successfully for booking with ID " + bookingId + "!");
     }
 
     /**
      * Deletes a review by its ID.
      *
      * @param reviewId the ID of the review to delete
-     * @param username the username of the user making the request
-     * @throws ResponseStatusException if the review is not found, or if the user does not have permission to delete it
-     * @throws IllegalArgumentException if the review ID or username is null or negative
+     * @throws ResponseStatusException if the review is not found
+     * @throws IllegalArgumentException if the review ID is null or negative
+     * @return a MessageResponseDTO with a message if the deletion was successful
      */
     @Transactional
-    public void deleteReview(Long reviewId, String username) {
-        if (reviewId == null || reviewId <= 0 || username == null) {
-            throw new IllegalArgumentException("Review ID and Username cannot be null or negative");
+    public MessageResponseDTO deleteReview(Long reviewId) {
+        if (reviewId == null || reviewId <= 0) {
+            throw new IllegalArgumentException("Review ID and cannot be null or negative");
         }
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
-        if (!review.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("You do not have permission to delete this review");
-        }
         if (review.getBooking() != null) {
             review.getBooking().setReview(null);
         }
         reviewRepository.deleteReviewById(reviewId);
+        return new MessageResponseDTO("Review with ID " + reviewId + " deleted successfully!");
     }
 
     /**
      * Updates an existing review.
      *
-     * @param reviewId        the ID of the review to update
-     * @param reviewRequestDTO the review request data transfer object
-     * @param username         the username of the user making the request
-     * @throws ResponseStatusException if the review is not found, or if the user does not have permission to update it
-     * @throws IllegalArgumentException if the review ID, review request DTO, or username is null or negative
-     * @return a ReviewResponseDTO containing the updated review
+     * @param reviewId the ID of the review to update
+     * @param reviewRequestDTO the DTO containing updated review data
+     * @throws ResponseStatusException if the review is not found
+     * @throws IllegalArgumentException if the review ID or review request DTO is null or negative
+     * @return a MessageResponseDTO with a message if the update was successful
      */
     @Transactional
-    public ReviewResponseDTO updateReview(Long reviewId, ReviewRequestDTO reviewRequestDTO, String username) {
-        if (reviewId == null || reviewId <= 0 || reviewRequestDTO == null || username == null) {
-            throw new IllegalArgumentException("Review ID, Review Request DTO and Username cannot be null or negative");
+    public MessageResponseDTO updateReview(Long reviewId, ReviewRequestDTO reviewRequestDTO) {
+        if (reviewId == null || reviewId <= 0 || reviewRequestDTO == null) {
+            throw new IllegalArgumentException("Review ID, Review Request DTO cannot be null or negative");
         }
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
-        if (!review.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("You do not have permission to update this review");
-        }
         review.setReviewDate(LocalDateTime.now());
         reviewMapper.updateReviewFromDto(reviewRequestDTO, review);
-        return reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        return (new MessageResponseDTO("Review with review ID " + reviewId + " updated successfully!"));
     }
 
     /**
-     * Updates the description of an existing review.
+     * Updates the comment of an existing review.
      *
-     * @param reviewId   the ID of the review to update
-     * @param description the new description for the review
-     * @param username    the username of the user making the request
-     * @throws ResponseStatusException if the review is not found, or if the user does not have permission to update it
-     * @throws IllegalArgumentException if the review ID, description, or username is null or negative
-     * @return a ReviewResponseDTO containing the updated review
+     * @param reviewId the ID of the review to update
+     * @param comment the new comment for the review
+     * @throws ResponseStatusException if the review is not found
+     * @throws IllegalArgumentException if the review ID or comment is null or negative
+     * @return a MessageResponseDTO with a message if the update was successful
      */
-    public ReviewResponseDTO updateReviewDescription(Long reviewId, String description, String username) {
-        if (reviewId == null || reviewId <= 0 || description == null || username == null) {
-            throw new IllegalArgumentException("Review ID, Description and Username cannot be null or negative");
+    @Transactional
+    public MessageResponseDTO updateReviewComment(Long reviewId, String comment) {
+        if (reviewId == null || reviewId <= 0 || comment == null) {
+            throw new IllegalArgumentException("Review ID or comment cannot be null or negative");
         }
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
-        if (!review.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("You do not have permission to update this review");
-        }
         review.setReviewDate(LocalDateTime.now());
-        review.setComment(description);
-        return reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        review.setComment(comment);
+        reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        return (new MessageResponseDTO("Review description with review ID " + reviewId + " updated to " + comment + " successfully!"));
     }
 
-    /**
+   /**
      * Updates the rating of an existing review.
      *
      * @param reviewId the ID of the review to update
-     * @param rating   the new rating for the review
-     * @param username the username of the user making the request
-     * @throws ResponseStatusException if the review is not found, or if the user does not have permission to update it
-     * @throws IllegalArgumentException if the review ID, rating, or username is null or negative
-     * @return a ReviewResponseDTO containing the updated review
+     * @param rating the new rating for the review
+     * @throws ResponseStatusException if the review is not found
+     * @throws IllegalArgumentException if the review ID or rating is null or negative
+     * @return a MessageResponseDTO with a message if the update was successful
      */
-    public ReviewResponseDTO updateReviewRating(Long reviewId, Integer rating, String username) {
-        if (reviewId == null || reviewId <= 0 || rating == null || rating <= 0 || username == null) {
-            throw new IllegalArgumentException("Review ID, Rating and Username cannot be null or negative");
+    @Transactional
+    public MessageResponseDTO updateReviewRating(Long reviewId, Integer rating) {
+        if (reviewId == null || reviewId <= 0 || rating == null || rating <= 0) {
+            throw new IllegalArgumentException("Review ID or rating cannot be null or negative");
         }
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
-        if (!review.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("You do not have permission to update this review");
-        }
         review.setReviewDate(LocalDateTime.now());
         review.setRating(rating);
-        return reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        reviewMapper.reviewToReviewResponseDto(reviewRepository.save(review));
+        return (new MessageResponseDTO("Review rating with review ID " + reviewId + " updated to " + rating + " successfully!"));
+    }
+
+    /**
+     * Checks if the user is the owner of the review.
+     * @param reviewId the ID of the review
+     * @param username the username of the user
+     * @return true if the user is the owner of the review, false otherwise
+     */
+    @Transactional(readOnly = true)
+    public boolean isReviewOwner(Long reviewId, String username) {
+        if (reviewId == null || reviewId <= 0 || username == null) {
+            throw new IllegalArgumentException("Review ID and Username cannot be null or negative");
+        }
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+        return review.getUser().getUsername().equals(username);
     }
 }
