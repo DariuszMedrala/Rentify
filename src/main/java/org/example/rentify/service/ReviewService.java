@@ -52,7 +52,7 @@ public class ReviewService {
      * @return a ReviewResponseDTO containing the reviews for the specified booking
      */
     @Transactional(readOnly = true)
-    public ReviewResponseDTO getReviewsByBookingId(Long bookingId) {
+    public ReviewResponseDTO getReviewByBookingId(Long bookingId) {
         if (bookingId == null || bookingId <= 0) {
             throw new IllegalArgumentException("Booking ID and Username cannot be null or negative");
         }

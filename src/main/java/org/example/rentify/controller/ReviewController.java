@@ -44,9 +44,9 @@ public class ReviewController {
     @Operation(summary = "Get review by booking ID", description = "Retrieves review for a specific booking.")
     @GetMapping("/{bookingId}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @bookingService.isBookingOwner(#bookingId, principal.username))")
-    public ResponseEntity<ReviewResponseDTO> getReviewsFromBookingId(@Parameter(description = "Booking ID", in = ParameterIn.PATH)
+    public ResponseEntity<ReviewResponseDTO> getReviewByBookingId(@Parameter(description = "Booking ID", in = ParameterIn.PATH)
                                                                          @PathVariable Long bookingId) {
-        return ResponseEntity.ok(reviewService.getReviewsByBookingId(bookingId));
+        return ResponseEntity.ok(reviewService.getReviewByBookingId(bookingId));
     }
 
     /**
@@ -58,10 +58,8 @@ public class ReviewController {
     @Operation(summary = "Get all reviews", description = "Retrieves all reviews made by the authenticated user.")
     @GetMapping("/me/all")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<ReviewResponseDTO>> getAllReviews(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-        return ResponseEntity.ok(reviewService.getAllReviewsByUser(username));
+    public ResponseEntity<List<ReviewResponseDTO>> getAllReviewsByUser(Authentication authentication) {
+        return ResponseEntity.ok(reviewService.getAllReviewsByUser(((UserDetails) authentication.getPrincipal()).getUsername()));
     }
 
     /**

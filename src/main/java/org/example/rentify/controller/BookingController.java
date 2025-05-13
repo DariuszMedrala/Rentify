@@ -7,10 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.rentify.dto.request.BookingRequestDTO;
 import org.example.rentify.dto.response.BookingResponseDTO;
+import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.entity.enums.BookingStatus;
 import org.example.rentify.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,19 +39,16 @@ public class BookingController {
      * Creates a new booking for a property.
      *
      * @param bookingRequestDTO the booking request data transfer object
-     * @param authentication    the authentication object
-     * @return the created booking response data transfer object
+     * @param authentication the authentication object
+     * @return a message response indicating the result of the operation
      */
     @Operation(summary = "Create a new booking", description = "Creates a new booking if property is available and there are no date conflicts.")
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BookingResponseDTO> createBooking(@Valid @RequestBody BookingRequestDTO bookingRequestDTO, Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String username = userDetails.getUsername();
-        BookingResponseDTO response = bookingService.createBooking(bookingRequestDTO, username);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public MessageResponseDTO createBooking(@Parameter(description = "Booking Request DTO")
+                                                @Valid @RequestBody BookingRequestDTO bookingRequestDTO,
+                                            Authentication authentication) {
+        return bookingService.createBooking(bookingRequestDTO, ((UserDetails) authentication.getPrincipal()).getUsername());
     }
 
     /**
@@ -63,13 +60,8 @@ public class BookingController {
     @Operation(summary = "Get all bookings", description = "Retrieves all bookings for the authenticated user.")
     @GetMapping("/me/all")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<BookingResponseDTO>> getAllBookings(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String username = userDetails.getUsername();
-        List<BookingResponseDTO> bookings = bookingService.getAllBookingsFromLoggedUser(username);
-        return ResponseEntity.ok(bookings);
+    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsFromLoggedUser(Authentication authentication) {
+        return ResponseEntity.ok(bookingService.getAllBookingsFromLoggedUser(((UserDetails) authentication.getPrincipal()).getUsername()));
     }
 
     /**
@@ -80,79 +72,67 @@ public class BookingController {
      */
     @Operation(summary = "Get all bookings for given property ID", description = "Retrieves all bookings for a given property ID.")
     @GetMapping("/{propertyID}/all")
-    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsForProperty(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID) {
-        List<BookingResponseDTO> bookings = bookingService.getAllBookingsByPropertyId(propertyID);
-        return ResponseEntity.ok(bookings);
+    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsForProperty(@Parameter(description = "Property ID", in = ParameterIn.PATH)
+                                                                                  @PathVariable Long propertyID) {
+        return ResponseEntity.ok(bookingService.getAllBookingsByPropertyId(propertyID));
     }
 
     /**
      * Accepts or rejects a booking request for a property.
      *
-     * @param propertyID   the ID of the property
-     * @param bookingID    the ID of the booking
-     * @param bookingStatus the new status of the booking
-     * @param authentication the authentication object
-     * @return the updated booking response data transfer object
+     * @param propertyID the ID of the property
+     * @param bookingID the ID of the booking
+     * @param bookingStatus the status to set for the booking
+     * @return a message response indicating the result of the operation
      */
     @Operation(summary = "Allows the owner of a property to accept or reject a booking request",
             description = "Allows the owner of a property to accept or reject a booking request.")
     @PatchMapping("/{propertyID}/{bookingID}/booking-status")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @propertyService.isOwner(#propertyID, principal.username))")
-    public ResponseEntity<BookingResponseDTO> acceptBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID,
+    public MessageResponseDTO acceptBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH)
+                                                                @PathVariable Long propertyID,
                                                             @Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
-                                                            @Parameter(description = "Booking status") @RequestParam BookingStatus bookingStatus,
-                                                            Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String username = userDetails.getUsername();
-        BookingResponseDTO bookingResponseDTO = bookingService.acceptOrRejectBooking(bookingID, propertyID, bookingStatus, username);
-        return ResponseEntity.ok(bookingResponseDTO);
+                                                            @Parameter(description = "Booking status") @RequestParam BookingStatus bookingStatus){
+        return bookingService.acceptOrRejectBooking(bookingID, propertyID, bookingStatus);
     }
+
     /**
      * Deletes a booking for a property.
      *
+     * @param propertyID the ID of the property
      * @param bookingID the ID of the booking
      * @param authentication the authentication object
-     * @return a response entity indicating the result of the operation
+     * @return a message response indicating the result of the operation
      */
-    @Operation(summary = "Delete a booking",
-            description = "Deletes a booking for a property if the user is the owner of the property or an admin or the user who made the booking.")
+    @Operation(summary = "Delete a booking for a property",
+            description = "Deletes a booking for a property if an admin or the user who made the booking.")
     @DeleteMapping("{propertyID}/{bookingID}/delete")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') " +
-            "or @propertyService.isOwner(#propertyID, principal.username)" +
             "or @bookingService.isBookingOwner(#bookingID, principal.username))")
-    public ResponseEntity<?> deleteBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID,
+    public MessageResponseDTO deleteBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH) @PathVariable Long propertyID,
                                            @Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
                                            Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        bookingService.deleteBooking(bookingID, propertyID, userDetails.getUsername());
-        return ResponseEntity.status(HttpStatus.OK).body("Booking deleted successfully");
+        return bookingService.deleteBooking(bookingID, propertyID, ((UserDetails) authentication.getPrincipal()).getUsername());
+
     }
 
     /**
      * Updates a booking for a property.
      *
      * @param bookingID the ID of the booking
-     * @param bookingRequestDTO the updated booking request data transfer object
+     * @param bookingRequestDTO the booking request data transfer object
      * @param authentication the authentication object
-     * @return the updated booking response data transfer object
+     * @return a message response indicating the result of the operation
      */
     @Operation(summary = "Update a booking",
             description = "Updates a booking for a property if an admin or the user who made the booking.")
     @PutMapping("/{bookingID}/update")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') " +
             "or @bookingService.isBookingOwner(#bookingID, principal.username))")
-    public ResponseEntity<BookingResponseDTO> updateBooking(@Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
-                                                            @Parameter(description = "Booking request DTO") @Valid @RequestBody BookingRequestDTO bookingRequestDTO,
-                                                            Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        BookingResponseDTO bookingResponseDTO = bookingService.updateBooking(bookingRequestDTO, bookingID, userDetails.getUsername());
-        return ResponseEntity.ok(bookingResponseDTO);
+    public MessageResponseDTO updateBooking(@Parameter(description = "Booking ID", in = ParameterIn.PATH)
+                                                @PathVariable Long bookingID, @Parameter(description = "Booking request DTO")
+                                                @Valid @RequestBody BookingRequestDTO bookingRequestDTO, Authentication authentication) {
+    return bookingService.updateBooking(bookingRequestDTO, bookingID, ((UserDetails) authentication.getPrincipal()).getUsername());
     }
 }
 

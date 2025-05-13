@@ -2,16 +2,16 @@ package org.example.rentify.service;
 
 import org.example.rentify.dto.request.BookingRequestDTO;
 import org.example.rentify.dto.response.BookingResponseDTO;
+import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.entity.Booking;
 import org.example.rentify.entity.Property;
 import org.example.rentify.entity.User;
 import org.example.rentify.entity.enums.BookingStatus;
+import org.example.rentify.entity.enums.PaymentStatus;
 import org.example.rentify.mapper.BookingMapper;
 import org.example.rentify.repository.BookingRepository;
 import org.example.rentify.repository.PropertyRepository;
 import org.example.rentify.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,8 +31,6 @@ import java.util.Objects;
 @Service
 public class BookingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
-
     private final BookingRepository bookingRepository;
     private final PropertyRepository propertyRepository;
     private final UserRepository userRepository;
@@ -51,45 +49,51 @@ public class BookingService {
      *
      * @param bookingRequestDTO the booking request data transfer object
      * @param username the username of the user making the booking
-     * @return the created booking response data transfer object
-     * @throws ResponseStatusException if the property is not found, not available, or if there are date conflicts
+     * @throws ResponseStatusException if the property is not found, or if it is not available for booking,
+     *                                 or if there are date conflicts with existing bookings
+     * @return a message response data transfer object indicating success
      */
     @Transactional
-    public BookingResponseDTO createBooking(BookingRequestDTO bookingRequestDTO, String username) {
+    public MessageResponseDTO createBooking(BookingRequestDTO bookingRequestDTO, String username) {
         Property property = propertyRepository.findPropertyById(bookingRequestDTO.getPropertyId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found"));
+
         if (!Boolean.TRUE.equals(property.getAvailability())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property is not available for booking");
         }
         List<Booking> overlappingBookings = bookingRepository.findByPropertyIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
                 bookingRequestDTO.getPropertyId(),
                 bookingRequestDTO.getEndDate(),
-                bookingRequestDTO.getStartDate()
-        );
+                bookingRequestDTO.getStartDate());
+
         if (!overlappingBookings.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Property is already booked for the selected dates");
         }
+
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
         Booking booking = bookingMapper.bookingRequestDtoToBooking(bookingRequestDTO);
         booking.setUser(user);
         booking.setProperty(property);
+
         long days = ChronoUnit.DAYS.between(bookingRequestDTO.getStartDate(), bookingRequestDTO.getEndDate()) + 1;
         if (days <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End date must be after start date");
         }
+
         booking.setTotalPrice(property.getPricePerDay().multiply(BigDecimal.valueOf(days)));
         booking.setBookingDate(LocalDateTime.now());
         booking.setBookingStatus(BookingStatus.PENDING);
-        Booking saved = bookingRepository.save(booking);
-        logger.info("Booking created for property {} by user {}", property.getId(), user.getId());
-        return bookingMapper.bookingToBookingResponseDto(saved);
+        bookingMapper.bookingToBookingResponseDto(bookingRepository.save(booking));
+        return new MessageResponseDTO("Booking created successfully with ID: " + booking.getId());
     }
 
     /**
-     * Retrieves all bookings for a user.
+     * Retrieves all bookings for the logged-in user.
      *
-     * @param username the username of the user
+     * @param username the username of the logged-in user
+     * @throws ResponseStatusException if the user is not found or if no bookings are found
      * @return a list of booking response data transfer objects
      */
     @Transactional(readOnly = true)
@@ -109,6 +113,8 @@ public class BookingService {
      * Retrieves all bookings for a property.
      *
      * @param propertyID the ID of the property
+     * @throws ResponseStatusException if no bookings are found for the property
+     * @throws IllegalArgumentException if the property ID is null or negative
      * @return a list of booking response data transfer objects
      */
     @Transactional(readOnly = true)
@@ -126,74 +132,84 @@ public class BookingService {
         return bookings;
     }
 
-    /**
-     * Accepts or rejects a booking request.
+   /**
+     * Accepts or rejects a booking request for a property.
      *
      * @param bookingID the ID of the booking
      * @param propertyID the ID of the property
-     * @param bookingStatus the new status of the booking
-     * @param username the username of the user making the request
-     * @throws ResponseStatusException if the booking is not found or if the status is invalid
-     * @return the updated booking response data transfer object
+     * @param bookingStatus the status to set for the booking
+     * @throws ResponseStatusException if the booking is not found or if the payment is completed and status is cancelled
+     * @throws IllegalArgumentException if any of the parameters are null or negative
+     * @return a message response data transfer object indicating success
      */
     @Transactional
-    public BookingResponseDTO acceptOrRejectBooking(Long bookingID, Long propertyID, BookingStatus bookingStatus, String username) {
-        if(bookingID == null || bookingID <= 0 ||  propertyID == null || propertyID <= 0 || bookingStatus == null || username == null) {
+    public MessageResponseDTO acceptOrRejectBooking(Long bookingID, Long propertyID, BookingStatus bookingStatus) {
+        if(bookingID == null || bookingID <= 0 ||  propertyID == null || propertyID <= 0 || bookingStatus == null) {
             throw new IllegalArgumentException("Booking ID, Property ID, and Booking Status cannot be null or negative");
         }
         Booking booking = bookingRepository.findById(bookingID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+        if (bookingStatus.equals(BookingStatus.CANCELLED)) {
+            if (booking.getPayment().getPaymentStatus().equals(PaymentStatus.COMPLETED)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot cancel a completed booking");
+            }
+            bookingRepository.delete(booking);
+            return new MessageResponseDTO("Booking cancelled successfully");
+        }
         booking.setBookingStatus(bookingStatus);
-        Booking updatedBooking = bookingRepository.save(booking);
-        logger.info("Booking {} status updated to {} by user {}", bookingID, bookingStatus, username);
-        return bookingMapper.bookingToBookingResponseDto(updatedBooking);
+        return new MessageResponseDTO("Booking status updated successfully to: " + bookingStatus + " for booking ID: " + bookingID);
     }
 
     /**
-     * checks if the user is the owner of the booking
+     * Checks if the logged-in user is the owner of a booking.
+     *
      * @param bookingId the ID of the booking
-     * @param username the username of the user
-     * @return "true" if the user is the owner of the booking, "false" otherwise
+     * @param username the username of the logged-in user
+     * @throws ResponseStatusException if the booking is not found
+     * @return true if the user is the owner of the booking, false otherwise
      */
     @Transactional(readOnly = true)
-    public String isBookingOwner(Long bookingId, String username) {
+    public boolean isBookingOwner(Long bookingId, String username) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-        return booking.getUser().getUsername().equals(username) ? "true" : "false";
+        return Objects.equals(booking.getUser().getUsername(), username);
     }
 
     /**
-     * Deletes a booking.
+     * Deletes a booking for a property.
      *
      * @param bookingID the ID of the booking
      * @param propertyID the ID of the property
      * @param username the username of the user making the request
-     * @throws ResponseStatusException if the booking is not found or if the user is not authorized
+     * @throws ResponseStatusException if the booking is not found
+     * @throws IllegalArgumentException if any of the parameters are null or negative
+     * @return a message response data transfer object indicating success
      */
     @Transactional
-    public void deleteBooking(Long bookingID, Long propertyID, String username) {
+    public MessageResponseDTO deleteBooking(Long bookingID, Long propertyID, String username) {
         if (bookingID == null || bookingID <= 0 || propertyID == null || propertyID <= 0 || username == null) {
             throw new IllegalArgumentException("Booking ID, Property ID, and Username cannot be null or negative");
         }
         Booking booking = bookingRepository.findById(bookingID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
         bookingRepository.delete(booking);
-        logger.info("Booking {} deleted by user {}", bookingID, username);
+        return new MessageResponseDTO("Booking ID " + bookingID + " deleted successfully");
     }
 
     /**
-     * Updates a booking.
+     * Updates a booking for a property.
      *
-     * @param bookingRequestDTO the updated booking request data transfer object
+     * @param bookingRequestDTO the booking request data transfer object
      * @param bookingID the ID of the booking
      * @param username the username of the user making the request
-     * @throws ResponseStatusException if the booking is not found or if there are date conflicts
-     * @return the updated booking response data transfer object
+     * @throws ResponseStatusException if the booking is not found or if there are date conflicts with existing bookings
+     * @throws IllegalArgumentException if any of the parameters are null or negative
+     * @return a message response data transfer object indicating success
      */
     @Transactional
-    public BookingResponseDTO updateBooking(BookingRequestDTO bookingRequestDTO, Long bookingID, String username) {
-        if (bookingRequestDTO == null || bookingID == null || bookingID <= 0 || username == null) {
-            throw new IllegalArgumentException("Booking Request DTO, Booking ID, and Username cannot be null or negative");
+    public MessageResponseDTO updateBooking(BookingRequestDTO bookingRequestDTO, Long bookingID, String username) {
+        if (bookingRequestDTO == null || bookingID == null || bookingID <= 0) {
+            throw new IllegalArgumentException("Booking Request DTO or Booking ID cannot be null or negative");
         }
         Booking booking = bookingRepository.findById(bookingID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
@@ -212,13 +228,16 @@ public class BookingService {
         }
         bookingMapper.updateBookingFromDto(bookingRequestDTO, booking);
         booking.setBookingDate(LocalDateTime.now());
+
         long days = ChronoUnit.DAYS.between(bookingRequestDTO.getStartDate(), bookingRequestDTO.getEndDate()) + 1;
         if (days <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End date must be after start date");
         }
+
         booking.setTotalPrice(booking.getProperty().getPricePerDay().multiply(BigDecimal.valueOf(days)));
         booking.setBookingStatus(BookingStatus.PENDING);
         bookingRepository.save(booking);
-        return bookingMapper.bookingToBookingResponseDto(booking);
+
+        return new MessageResponseDTO("Booking updated successfully with ID: " + booking.getId());
     }
 }
