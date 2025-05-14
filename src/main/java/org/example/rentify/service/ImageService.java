@@ -3,6 +3,7 @@ package org.example.rentify.service;
 import org.example.rentify.dto.request.ImageRequestDTO;
 
 import org.example.rentify.dto.response.ImageResponseDTO;
+import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.entity.Image;
 import org.example.rentify.entity.Property;
 import org.example.rentify.mapper.ImageMapper;
@@ -38,18 +39,18 @@ public class ImageService {
         this.imageMapper = imageMapper;
         this.propertyService = propertyService;
     }
+
     /**
      * Adds an image to a property.
      *
-     * @param propertyId the ID of the property
+     * @param propertyId the ID of the property to which the image will be added
      * @param imageRequestDTO the DTO containing image data
-     * @throws IllegalArgumentException if propertyId or imageRequestDTO is null
-     * @throws AccessDeniedException if the user is not authorized to add images to the property
+     * @throws IllegalArgumentException if propertyId is null or negative, or if imageRequestDTO is null
+     * @return a MessageResponseDTO indicating the result of the operation
      */
     @Transactional
-    public void addImageToProperty(Long propertyId, ImageRequestDTO imageRequestDTO) {
+    public MessageResponseDTO addImageToProperty(Long propertyId, ImageRequestDTO imageRequestDTO) {
         if (propertyId == null || propertyId < 0 || imageRequestDTO == null) {
-            logger.error("Property ID or Image Request DTO is null");
             throw new IllegalArgumentException("Property ID and Image Request DTO must not be null");
         }
         Property managedProperty = propertyService.getPropertyEntityById(propertyId);
@@ -57,77 +58,72 @@ public class ImageService {
         image.setProperty(managedProperty);
         image.setUploadDate(LocalDateTime.now());
         imageRepository.save(image);
-        logger.info("Image successfully added to property with ID: {}", propertyId);
+        return new MessageResponseDTO("Image successfully added to property with ID " + propertyId);
     }
 
     /**
      * Retrieves all images associated with a property.
      *
      * @param propertyId the ID of the property
-     * @return a list of ImageResponseDTOs representing the images
      * @throws IllegalArgumentException if propertyId is null or negative
      * @throws ResponseStatusException if no images are found for the property or the property does not exist
+     * @return a list of ImageResponseDTOs representing the images
      */
     @Transactional(readOnly = true)
     public List<ImageResponseDTO> getAllImagesByPropertyId(Long propertyId) {
         if (propertyId == null || propertyId <= 0) {
-            logger.error("Property ID is null or negative");
             throw new IllegalArgumentException("Property ID must not be null or negative");
         }
         if (propertyService.getPropertyEntityById(propertyId) == null) {
-            logger.error("Property with ID {} not found", propertyId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found");
         }
         List<Image> images = imageRepository.findByPropertyId(propertyId);
         if (images.isEmpty()) {
-            logger.error("No images found for property with ID {}", propertyId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No images found for this property");
         }
         return images.stream()
                 .map(imageMapper::imageToImageResponseDto)
                 .collect(Collectors.toList());
     }
+
     /**
-     * Deletes an image from a property.
+     * Deletes an image associated with a property.
      *
      * @param propertyId the ID of the property
      * @param imageId the ID of the image to be deleted
      * @throws IllegalArgumentException if propertyId or imageId is null or negative
      * @throws ResponseStatusException if the property or image does not exist
+     * @return a MessageResponseDTO indicating the result of the operation
      */
     @Transactional
-    public void deleteImageFromProperty(Long propertyId, Long imageId) {
+    public MessageResponseDTO deleteImageFromProperty(Long propertyId, Long imageId) {
         if (propertyId == null || propertyId <= 0 || imageId == null || imageId <= 0) {
-            logger.error("Property ID or Image ID is null or negative");
             throw new IllegalArgumentException("Property ID and Image ID must not be null or negative");
         }
         if (propertyService.getPropertyEntityById(propertyId) == null) {
-            logger.error("Property with ID number {} not found", propertyId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found");
         }
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
         imageRepository.delete(image);
-        logger.info("Image with ID {} successfully deleted from property with ID {}", imageId, propertyId);
+        return new MessageResponseDTO("Image with ID " + imageId + " successfully deleted from property with ID " + propertyId);
     }
 
-    /**
-     * Updates an image associated with a property.
+   /** * Updates an image associated with a property.
      *
      * @param propertyId the ID of the property
      * @param imageId the ID of the image to be updated
      * @param imageRequestDTO the DTO containing updated image data
-     * @throws IllegalArgumentException if propertyId, imageId, or imageRequestDTO is null
+     * @throws IllegalArgumentException if propertyId, imageId, or imageRequestDTO is null or negative
      * @throws ResponseStatusException if the property or image does not exist
+     * @return a MessageResponseDTO indicating the result of the operation
      */
     @Transactional
-    public void updatesImageFromProperty(Long propertyId, Long imageId, ImageRequestDTO imageRequestDTO) {
+    public MessageResponseDTO updatesImageFromProperty(Long propertyId, Long imageId, ImageRequestDTO imageRequestDTO) {
         if (propertyId == null || propertyId <= 0 || imageId == null || imageId <= 0 || imageRequestDTO == null) {
-            logger.error("Property ID, Image ID or Image Request DTO is null or negative");
             throw new IllegalArgumentException("Property ID, Image ID and Image Request DTO must not be null or negative");
         }
         if (propertyService.getPropertyEntityById(propertyId) == null) {
-            logger.error("Property with ID number {} not found.", propertyId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found");
         }
         Image image = imageRepository.findById(imageId)
@@ -135,6 +131,6 @@ public class ImageService {
         imageMapper.updateImageFromDto(imageRequestDTO, image);
         image.setUploadDate(LocalDateTime.now());
         imageRepository.save(image);
-        logger.info("Image with ID {} successfully updated for property with ID {}", imageId, propertyId);
+        return new MessageResponseDTO("Image with ID " + imageId + " successfully updated for property with ID " + propertyId);
     }
 }
