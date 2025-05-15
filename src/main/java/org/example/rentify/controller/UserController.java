@@ -2,27 +2,26 @@ package org.example.rentify.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.example.rentify.dto.registration.UserRegistrationDTO;
 import org.example.rentify.dto.request.UserRequestDTO;
 import org.example.rentify.dto.response.UserResponseDTO;
 import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 
 /*
@@ -34,8 +33,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "User Management", description = "Endpoints for managing user accounts")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
 
@@ -53,12 +50,9 @@ public class UserController {
     @Operation(summary = "Get current authenticated user's details", description = "Retrieves the profile information of the currently logged-in user.")
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated.");
-        }
-        UserResponseDTO userResponseDTO = userService.findUserDtoByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(userResponseDTO);
+    public ResponseEntity<UserResponseDTO> findUserDtoByUsername(Authentication authentication) {
+
+        return ResponseEntity.ok(userService.findUserDtoByUsername(((UserDetails) authentication.getPrincipal()).getUsername()));
     }
 
     /**
@@ -71,9 +65,9 @@ public class UserController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or (isAuthenticated() and @userService.findUserEntityById(#id).username == principal.username)")
     public ResponseEntity<UserResponseDTO> getUserById(
-            @Parameter(description = "ID of the user to retrieve") @PathVariable Long id) {
-        UserResponseDTO userResponseDTO = userService.findUserDtoById(id);
-        return ResponseEntity.ok(userResponseDTO);
+            @Parameter(description = "ID of the user to retrieve", in = ParameterIn.PATH) @PathVariable Long id) {
+
+        return ResponseEntity.ok(userService.findUserDtoById(id));
     }
 
     /**
@@ -86,9 +80,11 @@ public class UserController {
     @GetMapping("/username/{username}")
     @PreAuthorize("hasRole('ADMIN') or (isAuthenticated() and #username == principal.username)")
     public ResponseEntity<UserResponseDTO> getUserByUsername(
-            @Parameter(description = "Username of the user to retrieve") @PathVariable String username) {
-        UserResponseDTO userResponseDTO = userService.findUserDtoByUsername(username);
-        return ResponseEntity.ok(userResponseDTO);
+            @Parameter(description = "Username of the user to retrieve", in = ParameterIn.PATH)
+            @Max(value = 50, message = "Username cannot be longer than 50 characters")
+            @Min(value = 3, message = "Username must be longer than 3 characters")@PathVariable String username) {
+
+        return ResponseEntity.ok(userService.findUserDtoByUsername(username));
     }
 
     /**
@@ -101,9 +97,9 @@ public class UserController {
     @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN') or (isAuthenticated() and @userService.findUserEntityByEmail(#email).username == principal.username)")
     public ResponseEntity<UserResponseDTO> getUserByEmail(
-            @Parameter(description = "Email of the user to retrieve") @PathVariable String email) {
-        UserResponseDTO userResponseDTO = userService.findUserDtoByEmail(email);
-        return ResponseEntity.ok(userResponseDTO);
+            @Parameter(description = "Email of the user to retrieve", in = ParameterIn.PATH) @PathVariable String email) {
+
+        return ResponseEntity.ok(userService.findUserDtoByEmail(email));
     }
 
     /**
@@ -119,56 +115,52 @@ public class UserController {
             name = "pageable",
             description = "Pageable object containing pagination information",
             example = "{\"page\": 0, \"size\": 10, \"sort\": \"username,asc\"}") @PageableDefault Pageable pageable) {
-        Page<UserResponseDTO> userResponseDTOPage = userService.findAllUsers(pageable);
-        return ResponseEntity.ok(userResponseDTOPage);
+
+        return ResponseEntity.ok(userService.findAllUsers(pageable));
     }
 
     /**
-     * Creates a new user account (by an Admin).
+     * Allows an administrator to create a new user account.
      *
-     * @param userRegistrationDTO The registration details of the new user.
-     * @return The created user's details.
+     * @param userRegistrationDTO The details of the user to create.
+     * @return A message indicating the result of the operation.
      */
     @Operation(summary = "Admin Create New User", description = "Allows an administrator to create a new user account. The user will be created with default role.")
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDTO> adminCreateUser(@Valid @RequestBody UserRegistrationDTO userRegistrationDTO) {
-        UserResponseDTO userResponseDTO = userService.registerNewUser(userRegistrationDTO);
-        logger.info("Admin created new user successfully: {}", userRegistrationDTO.getUsername());
-        return ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
+    public MessageResponseDTO adminCreateUser(@Parameter(description = "User RegistrationDTO")
+                                                  @Valid @RequestBody UserRegistrationDTO userRegistrationDTO) {
+
+        return userService.registerNewUser(userRegistrationDTO);
     }
 
     /**
      * Updates an existing user's details.
-     *
      * @param id The ID of the user to update.
      * @param userRequestDTO The updated user details.
-     * @return The updated user's details.
+     * @return A message indicating the result of the update operation.
      */
     @Operation(summary = "Update user by ID", description = "Updates an existing user's details. Requires ADMIN role or for the user to be updating their own data.")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or (isAuthenticated() and @userService.findUserEntityById(#id).username == principal.username)")
-    public ResponseEntity<UserResponseDTO> updateUser(
-            @Parameter(description = "ID of the user to update") @PathVariable Long id,
-            @Valid @RequestBody UserRequestDTO userRequestDTO) {
-        UserResponseDTO updatedUserResponseDTO = userService.updateUser(id, userRequestDTO);
-        logger.info("User with ID {} updated successfully.", id);
-        return ResponseEntity.ok(updatedUserResponseDTO);
+    public MessageResponseDTO updateUser(
+            @Parameter(description = "ID of the user to update", in = ParameterIn.PATH) @PathVariable Long id,
+            @Parameter(description = "User Body Request DTO") @Valid @RequestBody UserRequestDTO userRequestDTO) {
+
+        return userService.updateUser(id, userRequestDTO);
     }
 
     /**
      * Deletes a user by their ID.
-     *
      * @param id The ID of the user to delete.
-     * @return A success message.
+     * @return A message indicating the result of the deletion operation.
      */
     @Operation(summary = "Delete user by ID", description = "Deletes a user by their ID. Requires ADMIN role.")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponseDTO> deleteUser(
-            @Parameter(description = "ID of the user to delete") @PathVariable Long id) {
-        userService.deleteUser(id);
-        logger.info("User with ID {} deleted successfully.", id);
-        return ResponseEntity.ok(new MessageResponseDTO("User with ID " + id + " deleted successfully."));
+    public MessageResponseDTO deleteUser(
+            @Parameter(description = "ID of the user to delete", in = ParameterIn.PATH) @PathVariable Long id) {
+
+        return userService.deleteUser(id);
     }
 }
