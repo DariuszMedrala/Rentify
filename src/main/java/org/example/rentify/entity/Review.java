@@ -32,7 +32,7 @@ public class Review {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @OneToOne()
+    @OneToOne
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
