@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import org.example.rentify.dto.registration.UserRegistrationDTO;
 import org.example.rentify.dto.request.UserRequestDTO;
 import org.example.rentify.dto.response.UserResponseDTO;
@@ -163,4 +164,25 @@ public class UserController {
 
         return userService.deleteUser(id);
     }
+
+    /**
+     * Allows a user to change their password.
+     * @param newPassword The new password for the user.
+     * @param authentication The authentication object containing user details.
+     * @return A message indicating the result of the password change operation.
+     */
+    @Operation(summary = "Change user password", description = "Allows a user to change their password. Requires authentication.")
+    @PatchMapping("/update/password")
+    @PreAuthorize("isAuthenticated()")
+    public MessageResponseDTO changePassword(
+            @Parameter(description = "New password for the user") @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+                    message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+            @RequestParam String newPassword,
+            @Parameter(description = "Old password for the user") @RequestParam String oldPassword,
+            Authentication authentication) {
+
+        return userService.changePassword(((UserDetails) authentication.getPrincipal()).getUsername(), newPassword, oldPassword);
+    }
+
+
 }

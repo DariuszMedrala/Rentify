@@ -300,4 +300,29 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Error: Invalid username or password!"));
         }
     }
+
+    /**
+     * Changes the password for a user.
+     *
+     * @param username The username of the user whose password is to be changed.
+     * @param newPassword The new password to set.
+     * @param oldPassword The current password for verification.
+     * @return A MessageResponseDTO indicating success or failure.
+     * @throws IllegalArgumentException if username or newPassword is blank
+     * @throws ResponseStatusException if the old password is incorrect
+     */
+    @Transactional
+    public MessageResponseDTO changePassword(String username, String newPassword, String oldPassword) {
+        if (!StringUtils.hasText(username) || !StringUtils.hasText(newPassword)) {
+            throw new IllegalArgumentException("Username and new password cannot be blank.");
+        }
+
+        User user = findUserEntityByUsername(username);
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Old password is incorrect.");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return new MessageResponseDTO("Password changed successfully for user: " + username);
+    }
 }
