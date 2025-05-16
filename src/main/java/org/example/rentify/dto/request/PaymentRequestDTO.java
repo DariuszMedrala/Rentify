@@ -22,10 +22,6 @@ import java.math.BigDecimal;
 */
 public class PaymentRequestDTO {
 
-    @NotNull(message = "Booking ID cannot be null")
-    @Schema(example = "12345")
-    private Long bookingId;
-
     @NotNull(message = "Amount cannot be null")
     @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
     @Schema(example = "100.00")

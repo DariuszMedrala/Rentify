@@ -1,10 +1,14 @@
 package org.example.rentify.repository;
 
+import org.example.rentify.entity.Booking;
 import org.example.rentify.entity.Payment;
+import org.example.rentify.entity.User;
 import org.example.rentify.entity.enums.PaymentMethod;
 import org.example.rentify.entity.enums.PaymentStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -12,14 +16,6 @@ import java.util.List;
  * This interface extends JpaRepository to provide CRUD operations.
  */
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-
-    /**
-     * Finds a payment by its transaction ID.
-     *
-     * @param transactionId the transaction ID of the payment
-     * @return the payment with the specified transaction ID, or null if not found
-     */
-    Payment findByTransactionId(String transactionId);
 
     /**
      * Finds a payment by its booking ID.
@@ -30,18 +26,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Payment findByBookingId(Long bookingId);
 
     /**
-     * Finds all payments with the specified payment status.
+     * Finds all payments associated with a specific user.
      *
-     * @param paymentStatus the payment status of the payments
-     * @return a list of payments with the specified payment status
+     * @param user the user whose payments are to be found
+     * @return a list of payments associated with the specified user
      */
-    List<Payment> findByPaymentStatus(PaymentStatus paymentStatus);
-
-    /**
-     * Finds all payments with the specified payment method.
-     *
-     * @param paymentMethod the payment method of the payments
-     * @return a list of payments with the specified payment method
-     */
-    List<Payment> findByPaymentMethod(PaymentMethod paymentMethod);
+    List<Payment> findByUser(User user);
 }

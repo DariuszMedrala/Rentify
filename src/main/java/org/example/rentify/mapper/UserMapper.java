@@ -33,6 +33,7 @@ public interface UserMapper {
     @Mapping(target = "accountNonLocked", constant = "true")
     @Mapping(target = "credentialsNonExpired", constant = "true")
     @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "payments", ignore = true)
     User userRegistrationDtoToUser(UserRegistrationDTO userRegistrationDTO);
 
     /**
@@ -52,6 +53,7 @@ public interface UserMapper {
     @Mapping(target = "accountNonExpired", ignore = true)
     @Mapping(target = "accountNonLocked", ignore = true)
     @Mapping(target = "credentialsNonExpired", ignore = true)
+    @Mapping(target = "payments", ignore = true)
     User userRequestDtoToUser(UserRequestDTO userRequestDTO);
 
     /**
@@ -72,6 +74,7 @@ public interface UserMapper {
     @Mapping(target = "accountNonLocked", ignore = true)
     @Mapping(target = "credentialsNonExpired", ignore = true)
     @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "payments", ignore = true)
     void updateUserFromDto(UserRequestDTO userRequestDTO, @MappingTarget User user);
 
     /**

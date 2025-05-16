@@ -24,6 +24,7 @@ public interface PaymentMapper {
     @Mapping(target = "booking", ignore = true)
     @Mapping(target = "paymentDate", ignore = true)
     @Mapping(target = "paymentStatus", ignore = true)
+    @Mapping(target = "user", ignore = true)
     Payment paymentRequestDtoToPayment(PaymentRequestDTO paymentRequestDTO);
 
     /**
@@ -44,5 +45,6 @@ public interface PaymentMapper {
     @Mapping(target = "booking", ignore = true)
     @Mapping(target = "paymentDate", ignore = true)
     @Mapping(target = "paymentStatus", ignore = true)
+    @Mapping(target = "user", ignore = true)
     void updatePaymentFromDto(PaymentRequestDTO paymentRequestDTO, @MappingTarget Payment payment);
 }

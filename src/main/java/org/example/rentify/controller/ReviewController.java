@@ -11,6 +11,7 @@ import org.example.rentify.dto.request.ReviewRequestDTO;
 import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.dto.response.ReviewResponseDTO;
 import org.example.rentify.service.ReviewService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @Autowired
     public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
     }
