@@ -2,6 +2,7 @@ package org.example.rentify.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Builder
 /*
  * Image entity representing an image in the system.
  * This class is mapped to the "images" table in the database.

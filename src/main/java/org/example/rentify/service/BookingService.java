@@ -157,6 +157,7 @@ public class BookingService {
             return new MessageResponseDTO("Booking cancelled successfully");
         }
         booking.setBookingStatus(bookingStatus);
+        bookingRepository.save(booking);
         return new MessageResponseDTO("Booking status updated successfully to: " + bookingStatus + " for booking ID: " + bookingID);
     }
 

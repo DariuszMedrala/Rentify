@@ -34,6 +34,7 @@ public interface UserMapper {
     @Mapping(target = "credentialsNonExpired", constant = "true")
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "payments", ignore = true)
+    @Mapping(target = "password", ignore = true)
     User userRegistrationDtoToUser(UserRegistrationDTO userRegistrationDTO);
 
     /**
