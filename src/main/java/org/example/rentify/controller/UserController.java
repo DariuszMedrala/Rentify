@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.example.rentify.dto.registration.UserRegistrationDTO;
 import org.example.rentify.dto.request.UserRequestDTO;
 import org.example.rentify.dto.response.UserResponseDTO;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 @Tag(name = "User Management", description = "Endpoints for managing user accounts")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -82,8 +85,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or (isAuthenticated() and #username == principal.username)")
     public ResponseEntity<UserResponseDTO> getUserByUsername(
             @Parameter(description = "Username of the user to retrieve", in = ParameterIn.PATH)
-            @Max(value = 50, message = "Username cannot be longer than 50 characters")
-            @Min(value = 3, message = "Username must be longer than 3 characters")@PathVariable String username) {
+            @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters") @Valid @PathVariable String username) {
 
         return ResponseEntity.ok(userService.findUserDtoByUsername(username));
     }
