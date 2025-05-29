@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rentify - Property Rental Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(42, 157, 143, 0.1), traFnsparent);
+            animation: rotate 15s linear infinite;
+            pointer-events: none;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2a9d8f, #264653);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .description {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature {
+            background: linear-gradient(135deg, #f8f9ff, #e8ecff);
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(42, 157, 143, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(42, 157, 143, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-text {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .api-button {
+            background: linear-gradient(135deg, #2a9d8f, #264653);
+            color: white;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(42, 157, 143, 0.3);
+        }
+
+        .api-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .api-button:hover::before {
+            left: 100%;
+        }
+
+        .api-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(42, 157, 143, 0.4);
+        }
+
+        .api-button:active {
+            transform: translateY(-1px);
+        }
+
+        .tech-stack {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(42, 157, 143, 0.1);
+        }
+
+        .tech-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .tech-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .tech-badge {
+            background: linear-gradient(135deg, #2a9d8f, #264653);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape1 {
+            width: 60px;
+            height: 60px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape2 {
+            width: 80px;
+            height: 80px;
+            top: 70%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape3 {
+            width: 40px;
+            height: 40px;
+            top: 30%;
+            right: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .api-button {
+                padding: 1rem 2.5rem;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="floating-shapes">
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
+    <div class="shape shape3"></div>
+</div>
+
+<div class="container">
+    <h1 class="logo">Rentify</h1>
+    <p class="subtitle">Property Rental Platform</p>
+
+    <p class="description">
+        A comprehensive Spring Boot application designed for property rentals.
+        Featuring secure user authentication, property management, booking systems,
+        payment processing, and review management-all powered by modern technologies.
+    </p>
+
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">🏠</div>
+            <div class="feature-text">Property Management</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">📅</div>
+            <div class="feature-text">Booking System</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">💳</div>
+            <div class="feature-text">Payment Processing</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">⭐</div>
+            <div class="feature-text">Review System</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">🔐</div>
+            <div class="feature-text">JWT Security</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">👥</div>
+            <div class="feature-text">User Management</div>
+        </div>
+    </div>
+    <a href="http://localhost:8080/login.html" class="api-button" style="margin-bottom: 1rem;">
+        Login/Register to Start
+    </a>
+    <a href="http://localhost:8080/swagger-ui/index.html" class="api-button">
+        Explore API Documentation
+    </a>
+    <div class="tech-stack">
+        <div class="tech-title">Built with Modern Technologies</div>
+        <div class="tech-badges">
+            <span class="tech-badge">Spring Boot 3.4.5</span>
+            <span class="tech-badge">Java 21</span>
+            <span class="tech-badge">PostgreSQL</span>
+            <span class="tech-badge">Spring Security</span>
+            <span class="tech-badge">JWT</span>
+            <span class="tech-badge">Flyway</span>
+            <span class="tech-badge">Swagger UI</span>
+            <span class="tech-badge">MapStruct</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

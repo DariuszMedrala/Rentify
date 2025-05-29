@@ -76,25 +76,6 @@ public class JwtUtil {
     }
 
     /**
-     * Generate a JWT token from the username.
-     *
-     * @param username the username
-     * @return the generated JWT token
-     */
-    public String generateTokenFromUsername(String username) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuer(jwtIssuer)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    /**
      * Parse the JWT token and extract the username.
      *
      * @param token the JWT token
@@ -102,16 +83,6 @@ public class JwtUtil {
      */
     public String getUsernameFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    /**
-     * Get all claims from the JWT token.
-     *
-     * @param token the JWT token
-     * @return the claims extracted from the token
-     */
-    public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
     /**
@@ -136,20 +107,5 @@ public class JwtUtil {
             logger.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
-    }
-
-    /**
-     * Check if the token is expired.
-     *
-     * @param token the JWT token
-     * @return true if the token is expired, false otherwise
-     */
-    public boolean isTokenExpired(String token) {
-        try {
-            return getAllClaimsFromToken(token).getExpiration().before(new Date());
-        } catch(Exception e) {
-            logger.warn("Could not determine token expiration, assuming invalid/expired: {}", e.getMessage());
-            return true;
-        }
     }
 }
