@@ -4,12 +4,9 @@
 
 ## Project Overview
 
-<div style="display: flex; align-items: flex-start;">
-  <img src="images/img.png" alt="img" style="width: 140px; margin-right: 20px;" />
-  <p>
-    Rentify is a web application designed to streamline the rental process for both landlords and tenants. It provides a platform for landlords to list their properties and for tenants to find suitable rentals. The application includes features such as property listings, tenant applications, and rental agreements.
-  </p>
-</div>
+![img.png](images/img.png)
+Rentify is a web application designed to streamline the rental process for both landlords and tenants. It provides a platform for landlords to list their properties and for tenants to find suitable rentals. The application includes features such as property listings, tenant applications, and rental agreements.
+
 
 ---- 
 
