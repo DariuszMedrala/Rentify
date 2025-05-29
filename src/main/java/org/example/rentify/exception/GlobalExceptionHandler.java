@@ -1,5 +1,6 @@
 package org.example.rentify.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.example.rentify.dto.response.MessageResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ex.getStatusCode())
                 .body(new MessageResponseDTO(ex.getReason() != null ? ex.getReason() : "Error processing request."));
+    }
+
+    /**
+     * Handles ConstraintViolationException and returns a custom error message.
+     *
+     * @param ex the ConstraintViolationException
+     * @return a ResponseEntity with the error message
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<MessageResponseDTO> handleConstraintViolationException(ConstraintViolationException ex) {
+        String errors = ex.getConstraintViolations().stream()
+                .map(cv -> {
+                    String propertyPath = cv.getPropertyPath().toString();
+                    // Uproszczenie nazwy pola, np. z "findRoleByName.name" na "name"
+                    int dotIndex = propertyPath.lastIndexOf('.');
+                    if (dotIndex != -1) {
+                        propertyPath = propertyPath.substring(dotIndex + 1);
+                    }
+                    return propertyPath + ": " + cv.getMessage();
+                })
+                .collect(Collectors.joining(", "));
+        logger.warn("Constraint violation (parameter/path): {}", errors, ex);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDTO("Validation Error: " + errors));
     }
 
     /**
