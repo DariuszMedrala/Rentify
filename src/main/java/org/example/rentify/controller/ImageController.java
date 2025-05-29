@@ -14,6 +14,7 @@ import org.example.rentify.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequestMapping("/api/properties/{propertyId}/image")
 @Tag(name = "Image Management", description = "Endpoints for managing property images")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class ImageController {
 
     private final ImageService imageService;
