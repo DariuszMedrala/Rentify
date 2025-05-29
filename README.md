@@ -5,7 +5,7 @@
 ## Project Overview
 
 <div style="display: flex; align-items: flex-start;">
-  <img src="img.png" alt="img" style="width: 140px; margin-right: 20px;" />
+  <img src="images/img.png" alt="img" style="width: 140px; margin-right: 20px;" />
   <p>
     Rentify is a web application designed to streamline the rental process for both landlords and tenants. It provides a platform for landlords to list their properties and for tenants to find suitable rentals. The application includes features such as property listings, tenant applications, and rental agreements.
   </p>
@@ -120,7 +120,7 @@ The application will be accessible at `http://localhost:8080`.
 
 
 ## API Documentation
-![img_1.png](img_1.png)
+![img_1.png](images/img_1.png)
 Once the application is running, API documentation is available via Swagger UI at:
 
 `http://localhost:8080/swagger-ui.html`
@@ -131,7 +131,7 @@ You can explore and interact with all available API endpoints here. Some endpoin
 
 ## Default Admin User
 
-![img_2.png](img_2.png)
+![img_2.png](images/img_2.png)
 
 Upon first startup, a default admin user and roles (ADMIN, USER) are created by the `DataInitializer`:
 *   **Username:** `admin`
@@ -175,7 +175,7 @@ Rentify/
 
 ## ER Diagram
 
-![img_4.png](img_4.png)
+![img_4.png](images/img_4.png)
 
 
 -----------
@@ -188,4 +188,4 @@ To run the unit and integration tests:
 ./mvnw test
 ```
 Jacoco test coverage reports are generated during the test phase.
-![img_3.png](img_3.png)
+![img_3.png](images/img_3.png)
