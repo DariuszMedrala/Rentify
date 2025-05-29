@@ -57,6 +57,7 @@ public class ControllerTestConfig {
                         .requestMatchers("/api/properties/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/bookings/reviews/property/{propertyId}").permitAll()
                         .requestMatchers("/api/bookings/**").permitAll()
+                        .requestMatchers("/api/properties/**").permitAll()
                         .requestMatchers("/api/bookings/reviews/**").authenticated()
                         .anyRequest().authenticated()
                 );

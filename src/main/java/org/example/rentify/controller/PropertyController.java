@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 import org.example.rentify.dto.request.PropertyRequestDTO;
 import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.dto.response.PropertyResponseDTO;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 @RequestMapping("/api/properties")
 @Tag(name = "Properties Management", description = "Endpoints for managing properties")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class PropertyController {
 
     private final PropertyService propertyService;
@@ -102,11 +105,11 @@ public class PropertyController {
     @GetMapping("/{city}/{country}/{availability}")
     public ResponseEntity<Page<PropertyResponseDTO>> getAllPropertiesByCityCountryAvailability(
             @Parameter(description = "Name of the city", in = ParameterIn.PATH)
-            @Max(value = 100, message = "City name cannot be longer than 100 characters")
-            @PathVariable String city,
+            @Size(max = 100, message = "City name cannot be longer than 100 characters")
+            @Valid @PathVariable String city,
             @Parameter(description = "Name of the country", in = ParameterIn.PATH)
-            @Max(value = 100, message = "Country name cannot be longer than 100 characters")
-            @PathVariable String country,
+            @Size(max = 100, message = "Country name cannot be longer than) 100 characters")
+            @Valid @PathVariable String country,
             @Parameter(description = "Availability status", in = ParameterIn.PATH) @PathVariable boolean availability,
             @Parameter(name = "pageable",
                     description = "Pageable object containing pagination information",
