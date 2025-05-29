@@ -16,10 +16,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+
 
 /**
  * PaymentController is a REST controller that handles payment-related operations.
@@ -28,6 +31,7 @@ import java.util.List;
 @RestController()
 @RequestMapping("/api/bookings/payments")
 @Tag(name = "Payment Management", description = "Endpoints for managing booking payments")
+@Validated
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -54,17 +58,17 @@ public class PaymentController {
      * Makes a payment for a specific booking.
      *
      * @param bookingId the ID of the booking for which the payment is being made
-     * @param paymentResponseDTO the DTO containing payment details
+     * @param paymentRequestDTO the DTO containing payment details
      * @return a MessageResponseDTO indicating the result of the payment operation
      */
     @Operation(summary = "Make a payment for a booking", description = "Processes a payment for a specific booking.")
     @PostMapping("/{bookingId}/pay")
-    @PreAuthorize("isAuthenticated() and (hasRole('Admin') or @bookingService.isBookingOwner(#bookingId, principal.username))")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @bookingService.isBookingOwner(#bookingId, principal.username))")
     public MessageResponseDTO makePayment(@Parameter(description = "Booking ID", in = ParameterIn.PATH)
-                                          @PathVariable Long bookingId,@Parameter(description = "Payment DTO")
-                                          @Valid PaymentRequestDTO paymentResponseDTO) {
+                                          @PathVariable Long bookingId,
+                                          @Parameter(description = "Payment DTO") @Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
 
-        return paymentService.makePayment(bookingId, paymentResponseDTO);
+        return paymentService.makePayment(bookingId, paymentRequestDTO);
     }
 
     /**
@@ -75,7 +79,7 @@ public class PaymentController {
      */
     @Operation(summary = "Get payment by booking ID", description = "Retrieves payment details for a specific booking.")
     @GetMapping("/{bookingId}")
-    @PreAuthorize("isAuthenticated() and (hasRole('Admin') or @bookingService.isBookingOwner(#bookingId, principal.username))")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @bookingService.isBookingOwner(#bookingId, principal.username))")
     public ResponseEntity<PaymentResponseDTO> getPaymentByBookingId(@Parameter(description = "Booking ID", in = ParameterIn.PATH)
                                                                       @PathVariable Long bookingId) {
         return ResponseEntity.ok(paymentService.getPaymentByBookingId(bookingId));
@@ -89,7 +93,7 @@ public class PaymentController {
      */
     @Operation(summary = "Delete payment by booking ID", description = "Deletes a payment associated with a specific booking.")
     @DeleteMapping("/{bookingId}/delete")
-    @PreAuthorize("isAuthenticated() and (hasRole('Admin') or @bookingService.isBookingOwner(#bookingId, principal.username))")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @bookingService.isBookingOwner(#bookingId, principal.username))")
     public MessageResponseDTO deletePaymentByBookingId(@Parameter(description = "Booking ID", in = ParameterIn.PATH)
                                                         @PathVariable Long bookingId) {
         return paymentService.deletePaymentByBookingId(bookingId);
@@ -103,7 +107,7 @@ public class PaymentController {
      */
     @Operation(summary = "Get all payments by user", description = "Retrieves all payments made by a specific user.")
     @GetMapping("/user/{username}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PaymentResponseDTO>> getAllPaymentsByUser(@Parameter(description = "Username of the user", in = ParameterIn.PATH)
                                                                            @PathVariable String username) {
         return ResponseEntity.ok(paymentService.getAllPaymentsByUser(username));
@@ -117,7 +121,7 @@ public class PaymentController {
      */
     @Operation(summary = "Get total amount paid by user", description = "Retrieves the total amount of money paid by a specific user.")
     @GetMapping("/user/{username}/total")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Double> getTotalAmountPaidByUser(@Parameter(description = "Username of the user", in = ParameterIn.PATH)
                                                             @PathVariable String username) {
         return ResponseEntity.ok(paymentService.getTotalAmountPaidByUser(username));
@@ -130,7 +134,7 @@ public class PaymentController {
      */
     @Operation(summary = "Get total amount paid by all users", description = "Retrieves the total amount of money paid by all users.")
     @GetMapping("/total")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BigDecimal> getTotalAmountPaidByAllUsers() {
         return ResponseEntity.ok(paymentService.getTotalAmountPaidByAllUsers());
     }
@@ -143,7 +147,7 @@ public class PaymentController {
      */
     @Operation(summary = "Get total amount paid by all users for a property", description = "Retrieves the total amount of money paid by all users for a specific property.")
     @GetMapping("/property/{propertyId}/total")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BigDecimal> getTotalAmountPaidByAllUsersForProperty(@Parameter(description = "Property ID", in = ParameterIn.PATH)
                                                                                 @PathVariable Long propertyId) {
         return ResponseEntity.ok(paymentService.getTotalAmountPaidByAllUsersForProperty(propertyId));
@@ -158,7 +162,7 @@ public class PaymentController {
      */
     @Operation(summary = "Update payment status", description = "Updates the status of a specific payment.")
     @PatchMapping("/{paymentId}/{paymentStatus}/update-status")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public MessageResponseDTO updatePaymentStatus(@Parameter(description = "Payment ID", in = ParameterIn.PATH)
                                                   @PathVariable Long paymentId,
                                                   @Parameter(description = "New payment status", in = ParameterIn.PATH)
@@ -175,7 +179,7 @@ public class PaymentController {
      */
     @Operation(summary = "Update payment method", description = "Updates the payment method for a specific payment.")
     @PatchMapping("/{paymentId}/{paymentMethod}/update-method")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public MessageResponseDTO updatePaymentMethod(@Parameter(description = "Payment ID", in = ParameterIn.PATH)
                                                   @PathVariable Long paymentId,
                                                   @Parameter(description = "New payment method", in = ParameterIn.PATH)
@@ -192,7 +196,7 @@ public class PaymentController {
      */
     @Operation(summary = "Update payment details", description = "Updates the entire payment details for a specific payment.")
     @PutMapping("/{paymentId}/update")
-    @PreAuthorize("isAuthenticated() and (hasRole('Admin') or @paymentService.isPaymentOwner(#paymentId, principal.username))")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @paymentService.isPaymentOwner(#paymentId, principal.username))")
     public MessageResponseDTO updatePayment(@Parameter(description = "Payment ID", in = ParameterIn.PATH)
                                             @PathVariable Long paymentId,
                                             @Parameter(description = "Payment Request DTO")

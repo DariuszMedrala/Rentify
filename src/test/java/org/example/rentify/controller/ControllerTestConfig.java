@@ -23,19 +23,13 @@ public class ControllerTestConfig {
     }
 
     @Bean
-    public JwtUtil jwtUtil() {
-        return Mockito.mock(JwtUtil.class);
-    }
+    public JwtUtil jwtUtil() {return Mockito.mock(JwtUtil.class);}
 
     @Bean
-    public UserDetailsServiceImpl userDetailsServiceImpl() {
-        return Mockito.mock(UserDetailsServiceImpl.class);
-    }
+    public UserDetailsServiceImpl userDetailsServiceImpl() {return Mockito.mock(UserDetailsServiceImpl.class);}
 
     @Bean
-    public RoleService roleService() {
-        return Mockito.mock(RoleService.class);
-    }
+    public RoleService roleService() {return Mockito.mock(RoleService.class);}
 
     @Bean
     public ImageService imageService() {return Mockito.mock(ImageService.class);}
@@ -48,6 +42,9 @@ public class ControllerTestConfig {
 
     @Bean
     public BookingService bookingService() {return Mockito.mock(BookingService.class);}
+
+    @Bean
+    public PaymentService paymentService() {return Mockito.mock(PaymentService.class);}
 
     @Bean
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
