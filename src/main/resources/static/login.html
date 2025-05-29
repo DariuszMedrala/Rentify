@@ -384,8 +384,8 @@
   </div>
 
   <div class="form-tabs">
-    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-    <button class="tab-btn" onclick="switchTab('register')">Register</button>
+    <button class="tab-btn active" onclick="switchTab('login', this)">Login</button>
+    <button class="tab-btn" onclick="switchTab('register', this)">Register</button>
   </div>
 
   <div id="message-container"></div>
@@ -410,7 +410,7 @@
         <button type="submit" class="submit-btn">Sign In</button>
       </form>
       <div class="form-footer">
-        <p>Don't have an account? <a href="#" onclick="switchTab('register')">Sign up here</a></p>
+        <p>Don't have an account? <a href="#" onclick="switchTabFromLink('register')">Sign up here</a></p>
       </div>
     </div>
 
@@ -448,7 +448,7 @@
         <button type="submit" class="submit-btn">Create Account</button>
       </form>
       <div class="form-footer">
-        <p>Already have an account? <a href="#" onclick="switchTab('login')">Sign in here</a></p>
+        <p>Already have an account? <a href="#" onclick="switchTabFromLink('login')">Sign in here</a></p>
       </div>
     </div>
   </div>
@@ -458,9 +458,40 @@
   const API_BASE_URL = 'http://localhost:8080/api/auth';
   const SWAGGER_URL = 'http://localhost:8080/swagger-ui/index.html';
 
-  function switchTab(tab) {
+  function switchTab(tab, buttonElement) {
+    // Remove active class from all tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+
+    // Add active class to clicked button
+    if (buttonElement) {
+      buttonElement.classList.add('active');
+    } else {
+      // Find the correct button if not provided
+      const buttons = document.querySelectorAll('.tab-btn');
+      if (tab === 'login') {
+        buttons[0].classList.add('active');
+      } else if (tab === 'register') {
+        buttons[1].classList.add('active');
+      }
+    }
+
+    // Switch form sections
+    document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+    document.getElementById(tab + '-form').classList.add('active');
+
+    clearMessage();
+  }
+
+  function switchTabFromLink(tab) {
+    // This function is specifically for links in the form footer
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    const buttons = document.querySelectorAll('.tab-btn');
+    if (tab === 'login') {
+      buttons[0].classList.add('active');
+    } else if (tab === 'register') {
+      buttons[1].classList.add('active');
+    }
 
     document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
     document.getElementById(tab + '-form').classList.add('active');
@@ -510,6 +541,7 @@
       window.location.href = SWAGGER_URL + '?authToken=' + encodeURIComponent(token);
     }, 1000);
   }
+
   async function makeRequest(url, method, data) {
     try {
       const response = await fetch(url, {
@@ -617,7 +649,7 @@
 
         setTimeout(() => {
           document.getElementById('registerForm').reset();
-          switchTab('login');
+          switchTabFromLink('login');
           showMessage('Account created successfully! Please log in.', 'success');
         }, 2000);
       } else {
