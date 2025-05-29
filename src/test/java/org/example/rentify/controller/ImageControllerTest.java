@@ -62,7 +62,7 @@ public class ImageControllerTest {
     @BeforeEach
     void setUp() {
         imageRequestDTO = new ImageRequestDTO();
-        imageRequestDTO.setImageUrl("example.com/image.jpg");
+        imageRequestDTO.setImageUrl("http://example.com/image.jpg");
         imageRequestDTO.setDescription("A beautiful landscape");
 
         imageResponseDTO = new ImageResponseDTO();
@@ -235,6 +235,7 @@ public class ImageControllerTest {
         @DisplayName("should return 403 Forbidden for non-owner/non-ADMIN")
         void whenDeleteImageAsNonOwner_thenReturns403() throws Exception {
             when(propertyService.isOwner(eq(testPropertyId), eq(otherUsername))).thenReturn(false);
+
 
             mockMvc.perform(delete("/api/properties/{propertyId}/image/delete/{imageId}", testPropertyId, testImageId))
                     .andExpect(status().isForbidden());

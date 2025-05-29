@@ -2,10 +2,7 @@ package org.example.rentify.controller;
 
 import org.example.rentify.security.UserDetailsServiceImpl;
 import org.example.rentify.security.jwt.JwtUtil;
-import org.example.rentify.service.ImageService;
-import org.example.rentify.service.PropertyService;
-import org.example.rentify.service.RoleService;
-import org.example.rentify.service.UserService;
+import org.example.rentify.service.*;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +44,12 @@ public class ControllerTestConfig {
     public PropertyService propertyService() {return Mockito.mock(PropertyService.class);}
 
     @Bean
+    public ReviewService reviewService() {return Mockito.mock(ReviewService.class);}
+
+    @Bean
+    public BookingService bookingService() {return Mockito.mock(BookingService.class);}
+
+    @Bean
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -55,6 +58,8 @@ public class ControllerTestConfig {
                         .requestMatchers("/api/roles/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/properties/{propertyId}/image/all").permitAll()
                         .requestMatchers("/api/properties/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/reviews/property/{propertyId}").permitAll()
+                        .requestMatchers("/api/bookings/reviews/**").authenticated()
                         .anyRequest().authenticated()
                 );
         return http.build();
