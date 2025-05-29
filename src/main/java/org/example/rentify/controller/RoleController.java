@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.example.rentify.dto.request.RoleRequestDTO;
 import org.example.rentify.dto.response.MessageResponseDTO;
 import org.example.rentify.dto.response.RoleResponseDTO;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /*
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/roles")
 @Tag(name = "Roles Management", description = "Endpoints for managing roles")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class RoleController {
 
     private final RoleService roleService;
@@ -65,8 +68,7 @@ public class RoleController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoleResponseDTO> findRoleByName(
             @Parameter(description = "Name of the role to retrieve", in = ParameterIn.PATH)
-            @Max(value = 50, message = "Role name cannot be longer than 50 letters")
-            @Min(value = 2, message = "role name cannot be smaller than 2 letters")
+            @Size(min = 2, max = 50, message = "Role name must be between 2 and 50 characters")
             @PathVariable String name) {
 
         return ResponseEntity.ok(roleService.findRoleByName(name));
@@ -101,7 +103,7 @@ public class RoleController {
         return roleService.createRole(roleRequestDTO);
     }
 
-   /**     * Deletes a role by its name.
+    /**     * Deletes a role by its name.
      *
      * @param name the name of the role to delete
      * @return a message indicating the result of the deletion
@@ -111,8 +113,7 @@ public class RoleController {
     @PreAuthorize("hasRole('ADMIN')")
     public MessageResponseDTO deleteRoleByName(
             @Parameter(description = "Name of the role to delete", in = ParameterIn.PATH)
-            @Max(value = 50, message = "Role name cannot be bigger than 50")
-            @Min(value = 2, message = "Role name cannot be less than 2")
+            @Size(min = 2, max = 50, message = "Role name must be between 2 and 50 characters")
             @PathVariable String name) {
 
         return roleService.deleteRoleByName(name);
@@ -147,8 +148,7 @@ public class RoleController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponseDTO>> findAllUsersByRoleName(
             @Parameter(description = "Name of the role to retrieve users for", in = ParameterIn.PATH)
-            @Max(value = 50, message = "Role name cannot be bigger than 50")
-            @Min(value = 2, message = "Role name cannot be less than 2")
+            @Size(min = 2, max = 50, message = "Role name must be between 2 and 50 characters")
             @PathVariable String roleName, Pageable pageable) {
 
         return ResponseEntity.ok(roleService.findAllUsersByRoleName(roleName, pageable));

@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class RoleRequestDTO {
 
     @NotBlank(message = "Role name cannot be blank")
-    @Size(min = 2, max = 50, message = "Role name cannot exceed 50 characters")
+    @Size(min = 2, max = 50, message = "Role name must be between 2 and 50 characters")
     @Schema(example = "ROLE")
     private String name;
 
