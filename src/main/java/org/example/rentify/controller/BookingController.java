@@ -12,6 +12,7 @@ import org.example.rentify.entity.enums.BookingStatus;
 import org.example.rentify.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bookings")
 @Tag(name = "Booking Management", description = "Endpoints for managing bookings")
+@Validated
 public class BookingController {
 
     private final BookingService bookingService;
@@ -90,9 +92,9 @@ public class BookingController {
     @PatchMapping("/{propertyID}/{bookingID}/booking-status")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or @propertyService.isOwner(#propertyID, principal.username))")
     public MessageResponseDTO acceptBooking(@Parameter(description = "Property ID", in = ParameterIn.PATH)
-                                                                @PathVariable Long propertyID,
-                                                            @Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
-                                                            @Parameter(description = "Booking status") @RequestParam BookingStatus bookingStatus){
+                                                @PathVariable Long propertyID,
+                                            @Parameter(description = "Booking ID", in = ParameterIn.PATH) @PathVariable Long bookingID,
+                                            @Valid @RequestParam BookingStatus bookingStatus){
         return bookingService.acceptOrRejectBooking(bookingID, propertyID, bookingStatus);
     }
 

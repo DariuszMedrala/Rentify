@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.dao.DataAccessException;
 
@@ -123,18 +124,27 @@ public class GlobalExceptionHandler {
                 .body(new MessageResponseDTO("Error: A database error occurred. Please try again later."));
     }
 
+
     /**
-     * Handles generic exceptions and returns a custom error message.
+     * Handles MethodArgumentTypeMismatchException which occurs when a method argument
+     * is not the expected type (e.g., failed enum conversion from request param).
      *
-     * @param ex the Exception
-     * @return a ResponseEntity with the error message
+     * @param ex the MethodArgumentTypeMismatchException
+     * @return a ResponseEntity with a BAD_REQUEST status and a descriptive error message.
      */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<MessageResponseDTO> handleGenericException(Exception ex) {
-        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<MessageResponseDTO> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown type";
+        String errorMessage = String.format(
+                "Parameter '%s' has an invalid value: '%s'. Expected type: '%s'.",
+                ex.getName(),
+                ex.getValue(),
+                requiredType
+        );
+        logger.warn("Method argument type mismatch: {}", errorMessage, ex);
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new MessageResponseDTO("Error: An unexpected internal server error occurred."));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDTO("Validation Error: " + errorMessage));
     }
 
     /**
@@ -149,5 +159,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(new MessageResponseDTO("Error: Access denied. You do not have permission to access this resource."));
+    }
+
+    /**
+     * Handles generic exceptions and returns a custom error message.
+     *
+     * @param ex the Exception
+     * @return a ResponseEntity with the error message
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<MessageResponseDTO> handleGenericException(Exception ex) {
+        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageResponseDTO("Error: An unexpected internal server error occurred."));
     }
 }
